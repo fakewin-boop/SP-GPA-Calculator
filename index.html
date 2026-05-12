@@ -1,855 +1,1522 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Singapore GPA Calculator – Poly & University | Free & Accurate</title>
-<meta name="description" content="Free Singapore GPA calculator for SP, NP, TP, RP, NYP, NUS, NTU, SMU and more. Calculate your cumulative GPA, what-if scenarios, and how much you need per module.">
-<meta name="keywords" content="SP GPA calculator, Singapore poly GPA, NUS GPA calculator, NTU GPA, cumulative GPA Singapore, poly GPA simulator">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gradio – Singapore GPA Calculator</title>
+<meta name="description" content="Free GPA calculator for Singapore students. Supports SP, NP, TP, NYP, RP, NUS, NTU, SMU, SUTD, SIT, SUSS, ITE. What-if simulator, comeback tracker, PDF export.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #0d0d0d;
-    --surface: #161616;
-    --surface2: #1e1e1e;
-    --border: #2a2a2a;
-    --accent: #c8f560;
-    --accent2: #5fe0c8;
-    --text: #f0f0f0;
-    --muted: #666;
-    --danger: #ff5e5e;
-    --warn: #ffc94a;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    padding: 0 0 80px;
-  }
-
-  /* Header */
-  header {
-    padding: 40px 24px 32px;
-    max-width: 760px;
-    margin: 0 auto;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(28px, 6vw, 44px);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-  }
-
-  h1 span { color: var(--accent); }
-
-  .subtitle {
-    margin-top: 10px;
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 300;
-  }
-
-  /* Main */
-  main {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 32px 24px 0;
-  }
-
-  /* School selector */
-  .section-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-
-  .school-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 8px;
-    margin-bottom: 28px;
-  }
-
-  .school-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: left;
-  }
-
-  .school-btn:hover { border-color: var(--accent); }
-
-  .school-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #0d0d0d;
-  }
-
-  .school-name {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    display: block;
-  }
-
-  .school-type {
-    font-size: 10px;
-    opacity: 0.6;
-    margin-top: 2px;
-    display: block;
-  }
-
-  /* GPA scale info */
-  .scale-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    margin-bottom: 28px;
-    color: var(--accent2);
-  }
-
-  /* Semester tabs */
-  .sem-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .sem-tab {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 7px 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    cursor: pointer;
-    color: var(--muted);
-    transition: all 0.15s;
-  }
-
-  .sem-tab:hover { color: var(--text); border-color: #444; }
-  .sem-tab.active { background: var(--surface2); color: var(--text); border-color: #555; }
-
-  .add-sem-btn {
-    background: none;
-    border: 1px dashed var(--border);
-    border-radius: 6px;
-    padding: 7px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    color: var(--muted);
-    transition: all 0.15s;
-  }
-
-  .add-sem-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* Module table */
-  .module-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 12px;
-  }
-
-  .module-table th {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-align: left;
-    padding: 0 8px 10px;
-    font-weight: 400;
-  }
-
-  .module-table td {
-    padding: 4px 8px;
-  }
-
-  .module-table input,
-  .module-table select {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 8px 10px;
-    transition: border-color 0.15s;
-    -webkit-appearance: none;
-  }
-
-  .module-table input:focus,
-  .module-table select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  .module-table select option { background: #1e1e1e; }
-
-  .delete-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.15s;
-    line-height: 1;
-  }
-
-  .delete-btn:hover { color: var(--danger); background: rgba(255,94,94,0.08); }
-
-  /* Buttons */
-  .btn-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .btn-ghost {
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-
-  .btn-ghost:hover { border-color: #555; }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #0d0d0d;
-    font-weight: 700;
-  }
-
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-
-  /* Results */
-  .results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-
-  .result-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    transition: border-color 0.2s;
-  }
-
-  .result-card.highlight {
-    border-color: var(--accent);
-    background: rgba(200, 245, 96, 0.04);
-  }
-
-  .result-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-
-  .result-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--accent);
-  }
-
-  .result-sub {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-
-  /* GPA bar */
-  .gpa-bar-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 28px;
-  }
-
-  .gpa-bar-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
-
-  .gpa-bar-track {
-    height: 8px;
-    background: var(--border);
-    border-radius: 99px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .gpa-bar-fill {
-    height: 100%;
-    border-radius: 99px;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  .gpa-bar-markers {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-  }
-
-  .gpa-marker {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-  }
-
-  /* What-if */
-  .whatif-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 28px;
-  }
-
-  .whatif-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
-    margin-bottom: 4px;
-  }
-
-  .whatif-desc {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 16px;
-  }
-
-  .whatif-row {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-  }
-
-  .whatif-field { flex: 1; min-width: 120px; }
-
-  .whatif-field label {
-    display: block;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-
-  .whatif-field input, .whatif-field select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 14px;
-    padding: 10px 12px;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .whatif-field input:focus, .whatif-field select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  .whatif-result {
-    margin-top: 16px;
-    padding: 14px;
-    background: var(--surface2);
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--text);
-    display: none;
-    line-height: 1.6;
-  }
-
-  .whatif-result.show { display: block; }
-  .whatif-result strong { color: var(--accent); }
-
-  /* Divider */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 32px 0;
-  }
-
-  /* Grade reference */
-  .grade-ref {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 28px;
-  }
-
-  .grade-ref-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    margin-bottom: 14px;
-  }
-
-  .grade-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .grade-pill {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--text);
-  }
-
-  .grade-pill span { color: var(--accent); margin-left: 4px; }
-
-  /* Sem delete */
-  .sem-delete {
-    font-size: 11px;
-    color: var(--danger);
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-left: 4px;
-    opacity: 0.6;
-  }
-  .sem-delete:hover { opacity: 1; }
-
-  /* Footer */
-  footer {
-    max-width: 760px;
-    margin: 60px auto 0;
-    padding: 0 24px;
-    border-top: 1px solid var(--border);
-    padding-top: 24px;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-
-  @media (max-width: 480px) {
-    .results-grid { grid-template-columns: 1fr 1fr; }
-    .whatif-row { flex-direction: column; }
-  }
+/* ─── CSS Variables (light + dark) ─── */
+:root {
+  --background: #fafbfc; --foreground: #1a1a2e;
+  --card: rgba(255,255,255,0.7); --card-foreground: #1a1a2e;
+  --primary: #6366f1; --primary-foreground: #fff;
+  --secondary: #e0e7ff; --secondary-foreground: #1a1a2e;
+  --muted: #f1f5f9; --muted-foreground: #64748b;
+  --border: rgba(226,232,240,0.5);
+  --input-bg: rgba(248,250,252,0.8);
+  --destructive: #ef4444; --success: #10b981; --warning: #f59e0b;
+  --radius: 1rem;
+}
+.dark {
+  --background: #0f0f1a; --foreground: #f8fafc;
+  --card: rgba(26,26,46,0.7); --card-foreground: #f8fafc;
+  --primary: #818cf8;
+  --secondary: #1e1b4b; --secondary-foreground: #f8fafc;
+  --muted: #1e293b; --muted-foreground: #94a3b8;
+  --border: rgba(51,65,85,0.5);
+  --input-bg: rgba(30,41,59,0.8);
+  --destructive: #f87171; --success: #34d399; --warning: #fbbf24;
+}
+
+/* ─── Reset ─── */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--background);color:var(--foreground);min-height:100vh;font-size:16px;transition:background .3s,color .3s;}
+
+/* ─── Utilities ─── */
+.glass{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius);}
+.glass-strong{background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);border:1px solid var(--border);}
+.dark .glass-strong{background:rgba(26,26,46,0.85);}
+.gradient-bg{background:linear-gradient(135deg,#fafbfc 0%,#f0f4ff 100%);min-height:100vh;}
+.dark .gradient-bg{background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 100%);}
+.gradient-purple{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);}
+.gradient-success{background:linear-gradient(135deg,#10b981 0%,#34d399 100%);}
+.gradient-warning{background:linear-gradient(135deg,#f59e0b 0%,#fbbf24 100%);}
+.smooth{transition:all .3s cubic-bezier(.4,0,.2,1);}
+.hidden{display:none!important;}
+.text-muted{color:var(--muted-foreground);}
+.text-primary{color:var(--primary);}
+.text-success{color:var(--success);}
+.text-destructive{color:var(--destructive);}
+.text-warning{color:var(--warning);}
+.font-bold{font-weight:700;} .font-semibold{font-weight:600;} .font-medium{font-weight:500;}
+
+/* ─── Nav ─── */
+#app-nav{position:sticky;top:0;z-index:50;padding:0 1.5rem;height:4rem;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:.5rem;font-size:1.25rem;font-weight:600;text-decoration:none;color:inherit;}
+.nav-logo-icon{width:2rem;height:2rem;border-radius:.75rem;display:flex;align-items:center;justify-content:center;}
+.nav-links{display:flex;gap:.25rem;align-items:center;}
+.nav-link{padding:.5rem 1rem;border-radius:.75rem;text-decoration:none;color:var(--muted-foreground);font-size:.875rem;font-weight:500;cursor:pointer;border:none;background:none;display:flex;align-items:center;gap:.5rem;transition:all .2s;}
+.nav-link:hover{background:rgba(99,102,241,.1);color:var(--foreground);}
+.nav-link.active{background:var(--primary);color:#fff;}
+.theme-btn{padding:.5rem;border-radius:.75rem;border:none;background:none;cursor:pointer;color:var(--foreground);transition:background .2s;}
+.theme-btn:hover{background:rgba(99,102,241,.1);}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;padding:.75rem .5rem;justify-content:space-around;}
+.mobile-nav-link{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.5rem .75rem;border-radius:.75rem;text-decoration:none;color:var(--muted-foreground);font-size:.7rem;cursor:pointer;border:none;background:none;transition:color .2s;}
+.mobile-nav-link.active{color:var(--primary);}
+
+/* ─── Pages ─── */
+.page{display:none;max-width:80rem;margin:0 auto;padding:2rem 1.5rem 5rem;}
+.page.active{display:block;}
+#landing-page{max-width:none;padding:0;}
+
+/* ─── Buttons ─── */
+.btn{padding:.625rem 1.5rem;border-radius:.75rem;border:none;cursor:pointer;font-weight:500;font-size:.875rem;transition:all .2s;}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-ghost{background:var(--card);border:1px solid var(--border);color:var(--foreground);}
+.btn-ghost:hover{background:rgba(99,102,241,.1);}
+.btn-danger{background:transparent;border:1px solid var(--destructive);color:var(--destructive);}
+.btn-danger:hover{background:rgba(239,68,68,.1);}
+.btn-danger-solid{background:var(--destructive);color:#fff;}
+.btn-success{background:linear-gradient(135deg,#10b981,#34d399);color:#fff;}
+
+/* ─── Cards ─── */
+.card{padding:1.5rem;margin-bottom:1.5rem;}
+.card-sm{padding:1rem;}
+
+/* ─── Form elements ─── */
+input[type=text],input[type=number],select,textarea{
+  width:100%;padding:.625rem .875rem;border-radius:.625rem;
+  border:1px solid var(--border);background:var(--input-bg);
+  color:var(--foreground);font-size:.9rem;outline:none;transition:border .2s;
+  -webkit-appearance:none;
+}
+input:focus,select:focus{border-color:var(--primary);}
+select option{background:var(--background);color:var(--foreground);}
+label.field-label{display:block;font-size:.8rem;color:var(--muted-foreground);margin-bottom:.4rem;}
+
+/* ─── Grid helpers ─── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;}
+.space-y>*+*{margin-top:1rem;}
+.space-y-sm>*+*{margin-top:.5rem;}
+
+/* ─── GPA Circle ─── */
+.gpa-circle-wrap{display:flex;justify-content:center;margin-bottom:1.5rem;}
+.gpa-circle{position:relative;}
+.gpa-circle svg{transform:rotate(-90deg);}
+.gpa-circle-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.gpa-circle-num{font-size:2.25rem;font-weight:700;line-height:1;}
+.gpa-circle-sub{font-size:.8rem;color:var(--muted-foreground);}
+
+/* ─── Module row ─── */
+.module-row{display:grid;grid-template-columns:3fr 1.2fr 2fr auto;gap:.5rem;align-items:center;padding:.5rem .75rem;border-radius:.75rem;}
+.module-row:hover{background:rgba(99,102,241,.05);}
+.icon-btn{padding:.4rem;border-radius:.5rem;border:none;background:none;cursor:pointer;color:var(--muted-foreground);transition:all .2s;display:flex;align-items:center;}
+.icon-btn:hover{color:var(--destructive);background:rgba(239,68,68,.1);}
+.icon-btn.save-btn:hover{color:var(--success);background:rgba(16,185,129,.1);}
+
+/* ─── Stat card ─── */
+.stat-card{padding:1.25rem;display:flex;flex-direction:column;gap:.5rem;}
+.stat-label{font-size:.75rem;color:var(--muted-foreground);}
+.stat-val{font-size:1.875rem;font-weight:700;line-height:1;}
+.stat-sub{font-size:.8rem;color:var(--muted-foreground);}
+
+/* ─── Progress bar ─── */
+.prog-track{height:.625rem;background:var(--muted);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:99px;transition:width .6s ease;}
+
+/* ─── Badge ─── */
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .75rem;border-radius:99px;font-size:.75rem;font-weight:600;}
+.badge-success{background:rgba(16,185,129,.15);color:var(--success);}
+.badge-warning{background:rgba(245,158,11,.15);color:var(--warning);}
+.badge-danger{background:rgba(239,68,68,.15);color:var(--destructive);}
+.badge-primary{background:rgba(99,102,241,.15);color:var(--primary);}
+
+/* ─── Simulation banner ─── */
+.sim-banner{padding:1rem 1.5rem;border:2px solid var(--warning);border-radius:var(--radius);background:rgba(245,158,11,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+
+/* ─── Landing ─── */
+.landing-hero{text-align:center;padding:5rem 1.5rem 6rem;max-width:50rem;margin:0 auto;}
+.landing-hero h1{font-size:clamp(2.5rem,7vw,4.5rem);font-weight:700;line-height:1.1;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1.5rem;}
+.landing-hero p{font-size:1.125rem;color:var(--muted-foreground);margin-bottom:3rem;max-width:36rem;margin-left:auto;margin-right:auto;}
+.landing-chip{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:99px;font-size:.875rem;color:var(--muted-foreground);margin-bottom:1.5rem;}
+.landing-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.landing-features{max-width:80rem;margin:0 auto;padding:4rem 1.5rem;}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;margin-top:3rem;}
+.feature-card{padding:2rem;}
+.feature-icon{width:3rem;height:3rem;border-radius:.75rem;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+.privacy-box{max-width:80rem;margin:0 auto;padding:0 1.5rem 4rem;}
+.privacy-inner{padding:3rem;text-align:center;border-radius:1.5rem;}
+.footer-bar{padding:2rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;max-width:80rem;margin:0 auto;}
+
+/* ─── Recharts-like chart (canvas) ─── */
+.chart-wrap{width:100%;height:200px;position:relative;}
+
+/* ─── Sector highlight ─── */
+.section-hdr{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground);padding:.75rem 0 .25rem;border-bottom:1px solid var(--border);margin-bottom:.5rem;}
+
+/* ─── Confirm dialog ─── */
+.confirm-box{padding:1rem;border-radius:.75rem;background:rgba(239,68,68,.08);border:1px solid var(--destructive);}
+.confirm-btns{display:flex;gap:.5rem;margin-top:.75rem;}
+
+/* ─── Sidebar stat sticky ─── */
+.sticky-sidebar{position:sticky;top:5rem;}
+
+/* ─── Semester tabs ─── */
+.sem-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+.sem-tab{padding:.4rem 1rem;border-radius:.625rem;border:1px solid var(--border);background:var(--card);font-size:.8rem;cursor:pointer;color:var(--muted-foreground);transition:all .2s;}
+.sem-tab.active{background:var(--secondary);color:var(--foreground);border-color:var(--primary);}
+.sem-tab-del{font-size:.75rem;color:var(--destructive);margin-left:.25rem;opacity:.6;}
+.sem-tab-del:hover{opacity:1;}
+
+/* ─── Planner ─── */
+.planner-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;}
+.planner-card{padding:1.25rem;display:flex;flex-direction:column;min-height:300px;}
+.planner-add-card{border:2px dashed var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;cursor:pointer;border-radius:var(--radius);transition:border .2s;}
+.planner-add-card:hover{border-color:var(--primary);}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+  .nav-links{display:none;}
+  .mobile-nav{display:flex;}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+  .module-row{grid-template-columns:1fr 1fr;row-gap:.25rem;}
+  .module-row .mod-name{grid-column:1/-1;}
+  .landing-hero{padding:3rem 1rem 4rem;}
+}
+@media(min-width:769px) and (max-width:1024px){
+  .grid-4{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr;}
+}
+
+/* ─── SVG icons ─── */
+svg.icon{width:1.25rem;height:1.25rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+svg.icon-sm{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+svg.icon-lg{width:3rem;height:3rem;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ─── Dashed add button ─── */
+.dashed-btn{width:100%;padding:.75rem;border:2px dashed var(--border);border-radius:.75rem;background:none;cursor:pointer;color:var(--muted-foreground);font-size:.875rem;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.5rem;}
+.dashed-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+/* ─── Alert ─── */
+.alert{padding:1rem 1.25rem;border-radius:.75rem;font-size:.875rem;margin-bottom:1rem;}
+.alert-info{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.3);}
+
+/* Empty state */
+.empty-state{padding:4rem 2rem;text-align:center;}
+.empty-state h2{font-size:1.5rem;font-weight:700;margin:.75rem 0 .5rem;}
+
+/* what-if result */
+.whatif-result{padding:.875rem 1rem;border-radius:.75rem;background:var(--muted);font-size:.875rem;line-height:1.6;margin-top:.75rem;}
 </style>
 </head>
-<body>
+<body class="gradient-bg">
 
-<header>
-  <div class="eyebrow">🇸🇬 Free Tool · No Login</div>
-  <h1>Singapore <span>GPA</span> Calculator</h1>
-  <p class="subtitle">Poly & University · Sem-by-sem · What-if simulator · Accurate grade points</p>
-</header>
-
-<main>
-
-  <!-- School Selector -->
-  <div class="section-label">Select your school</div>
-  <div class="school-grid" id="schoolGrid"></div>
-  <div id="scaleBadge" class="scale-badge">📊 Scale: 4.0</div>
-
-  <!-- Grade Reference -->
-  <div class="grade-ref">
-    <div class="grade-ref-title">Grade Reference</div>
-    <div class="grade-pills" id="gradePills"></div>
+<!-- ═══ NAV ═══ -->
+<nav id="app-nav" class="glass-strong" style="display:none">
+  <a class="nav-logo" onclick="nav('dashboard')">
+    <span class="nav-logo-icon gradient-purple">
+      <svg class="icon" style="stroke:#fff" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    </span>
+    Gradio
+  </a>
+  <div class="nav-links">
+    <button class="nav-link" data-page="dashboard" onclick="nav('dashboard')">
+      <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+    </button>
+    <button class="nav-link" data-page="calculator" onclick="nav('calculator')">
+      <svg class="icon-sm" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Calculator
+    </button>
+    <button class="nav-link" data-page="comeback" onclick="nav('comeback')">
+      <svg class="icon-sm" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Comeback
+    </button>
+    <button class="nav-link" data-page="planner" onclick="nav('planner')">
+      <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Planner
+    </button>
+    <button class="nav-link" data-page="settings" onclick="nav('settings')">
+      <svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings
+    </button>
   </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">
+    <svg class="icon" viewBox="0 0 24 24" id="theme-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+</nav>
 
-  <!-- Semester Tabs -->
-  <div class="sem-tabs" id="semTabs"></div>
+<!-- Mobile Nav -->
+<nav class="mobile-nav glass-strong" id="mobile-nav" style="display:none">
+  <button class="mobile-nav-link" data-page="dashboard" onclick="nav('dashboard')">
+    <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+  </button>
+  <button class="mobile-nav-link" data-page="calculator" onclick="nav('calculator')">
+    <svg class="icon-sm" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Calc
+  </button>
+  <button class="mobile-nav-link" data-page="comeback" onclick="nav('comeback')">
+    <svg class="icon-sm" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>Comeback
+  </button>
+  <button class="mobile-nav-link" data-page="planner" onclick="nav('planner')">
+    <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Planner
+  </button>
+</nav>
 
-  <!-- Module Table -->
-  <table class="module-table">
-    <thead>
-      <tr>
-        <th style="width:40%">Module Name <span style="opacity:0.4">(optional)</span></th>
-        <th style="width:20%">Credit Units</th>
-        <th style="width:28%">Grade</th>
-        <th style="width:12%"></th>
-      </tr>
-    </thead>
-    <tbody id="moduleBody"></tbody>
-  </table>
-
-  <div class="btn-row">
-    <button class="btn btn-ghost" onclick="addModule()">+ Add Module</button>
-    <button class="btn btn-ghost" onclick="addPreset()">+ Load Typical Sem</button>
-    <button class="btn btn-primary" onclick="calculate()">Calculate GPA</button>
-  </div>
-
-  <!-- Results -->
-  <div class="results-grid" id="resultsGrid" style="display:none"></div>
-
-  <div class="gpa-bar-wrap" id="gpaBarWrap" style="display:none">
-    <div class="gpa-bar-label">GPA Progress</div>
-    <div class="gpa-bar-track">
-      <div class="gpa-bar-fill" id="gpaBarFill" style="width:0%"></div>
+<!-- ═══ LANDING ═══ -->
+<div id="landing-page" class="page active gradient-bg">
+  <div class="landing-hero">
+    <div class="landing-chip glass">✦ Privacy-first · No login required</div>
+    <h1>Your academic life,<br>visualized.</h1>
+    <p>A premium GPA calculator and academic planning tool designed specifically for Singapore students. Track, plan, and optimize your academic journey.</p>
+    <div class="landing-btns">
+      <button class="btn btn-primary" onclick="nav('dashboard')" style="padding:.875rem 2rem;font-size:1rem;">Start Calculating</button>
+      <a href="#features" class="btn btn-ghost" style="padding:.875rem 2rem;font-size:1rem;text-decoration:none;">Learn More</a>
     </div>
-    <div class="gpa-bar-markers" id="gpaBarMarkers"></div>
   </div>
 
-  <hr class="divider">
-
-  <!-- What-if -->
-  <div class="whatif-box">
-    <div class="whatif-title">What-if Simulator</div>
-    <div class="whatif-desc">How much do I need next semester to hit my target GPA?</div>
-    <div class="whatif-row">
-      <div class="whatif-field">
-        <label>Target GPA</label>
-        <input type="number" id="targetGpa" placeholder="e.g. 3.8" step="0.01" min="0">
+  <div id="features" class="landing-features">
+    <div style="text-align:center;margin-bottom:2rem">
+      <h2 style="font-size:2rem;font-weight:700;margin-bottom:.75rem">Everything you need</h2>
+      <p class="text-muted">Built for Polytechnic, University, and ITE students across Singapore</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card glass">
+        <div class="feature-icon gradient-purple"><svg class="icon" style="stroke:#fff" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <h3 style="font-size:1.35rem;font-weight:600;margin-bottom:.75rem">Smart GPA Calculator</h3>
+        <p class="text-muted" style="margin-bottom:1rem;font-size:.9rem">Real-time GPA calculation supporting all Singapore institutions. Accurate grading for SP, NUS, NTU, SMU, SUTD and more.</p>
+        <ul style="list-style:none;font-size:.875rem" class="text-muted space-y-sm">
+          <li>• Instant GPA updates</li>
+          <li>• Semester grouping & tracking</li>
+          <li>• What-if simulation mode</li>
+          <li>• PDF export</li>
+        </ul>
       </div>
-      <div class="whatif-field">
-        <label>Next sem credit units</label>
-        <input type="number" id="nextCredits" placeholder="e.g. 15" min="1">
+      <div class="feature-card glass">
+        <div class="feature-icon gradient-success"><svg class="icon" style="stroke:#fff" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+        <h3 style="font-size:1.35rem;font-weight:600;margin-bottom:.75rem">Comeback Tracker</h3>
+        <p class="text-muted" style="margin-bottom:1rem;font-size:.9rem">Calculate your academic recovery path. See if your target grade is achievable and what you need to do.</p>
+        <ul style="list-style:none;font-size:.875rem" class="text-muted space-y-sm">
+          <li>• Recovery probability meter</li>
+          <li>• Semester-by-semester targets</li>
+          <li>• Motivational progress tracking</li>
+        </ul>
+      </div>
+      <div class="feature-card glass">
+        <div class="feature-icon gradient-warning"><svg class="icon" style="stroke:#fff" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <h3 style="font-size:1.35rem;font-weight:600;margin-bottom:.75rem">Semester Planner</h3>
+        <p class="text-muted" style="margin-bottom:1rem;font-size:.9rem">Plan your future semesters strategically. Avoid burnout with smart workload distribution.</p>
+        <ul style="list-style:none;font-size:.875rem" class="text-muted space-y-sm">
+          <li>• Module planning per semester</li>
+          <li>• Stress level heatmap</li>
+          <li>• Workload balance detection</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="privacy-box">
+    <div class="privacy-inner glass">
+      <svg class="icon-lg text-primary" style="margin:0 auto 1.5rem;display:block" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <h2 style="font-size:1.75rem;font-weight:700;margin-bottom:1rem">Your data stays with you</h2>
+      <p class="text-muted" style="max-width:36rem;margin:0 auto 2rem;font-size:1rem">Gradio is completely privacy-first. All your data is stored locally in your browser. No servers, no tracking, no accounts needed.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:1.5rem;justify-content:center;font-size:.875rem" class="text-muted">
+        <span>📊 100% Local Storage</span>
+        <span>🔒 No Login Required</span>
+        <span>✨ Open Source</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="privacy-box" style="text-align:center;padding-top:0">
+    <h2 style="font-size:2rem;font-weight:700;margin-bottom:1.5rem">Ready to visualize your academic journey?</h2>
+    <button class="btn btn-primary" onclick="nav('dashboard')" style="padding:.875rem 2rem;font-size:1rem;">Get Started Now</button>
+  </div>
+
+  <footer style="border-top:1px solid var(--border);margin-top:2rem">
+    <div class="footer-bar">
+      <div class="nav-logo">
+        <span class="nav-logo-icon gradient-purple" style="width:1.5rem;height:1.5rem;border-radius:.5rem">
+          <svg style="width:.875rem;height:.875rem;stroke:#fff;fill:none;stroke-width:2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </span>
+        Gradio
+      </div>
+      <p class="text-muted" style="font-size:.875rem">Made with care for Singapore students</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="dashboard-page" class="page">
+  <div style="margin-bottom:1.5rem">
+    <h1 style="font-size:2.25rem;font-weight:700;margin-bottom:.5rem">Dashboard</h1>
+    <p class="text-muted" id="dash-school-name">Select your school in the Calculator</p>
+  </div>
+  <div id="dash-empty" class="empty-state glass" style="display:none">
+    <svg class="icon-lg text-primary" style="margin:0 auto 1rem;display:block" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    <h2>Welcome to Gradio</h2>
+    <p class="text-muted" style="margin-bottom:1.5rem">Start by adding your modules to calculate your GPA and track your academic progress.</p>
+    <button class="btn btn-primary" onclick="nav('calculator')">Start Calculating</button>
+  </div>
+  <div id="dash-content">
+    <div class="grid-4" style="margin-bottom:1.5rem">
+      <div class="stat-card glass"><div class="stat-label">Current GPA</div><div class="stat-val" id="dash-gpa">0.00</div><div class="stat-sub" id="dash-class">—</div></div>
+      <div class="stat-card glass"><div class="stat-label">Modules</div><div class="stat-val" id="dash-mods">0</div><div class="stat-sub" id="dash-credits">0 Credits</div></div>
+      <div class="stat-card glass"><div class="stat-label">Semesters</div><div class="stat-val" id="dash-sems">0</div><div class="stat-sub">Tracked</div></div>
+      <div class="stat-card glass"><div class="stat-label">Progress</div><div class="stat-val" id="dash-pct">0%</div><div class="stat-sub">of Max GPA</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="glass card">
+        <h3 class="font-semibold" style="margin-bottom:1.25rem;font-size:1.125rem">GPA Trend</h3>
+        <canvas id="trend-chart" height="200"></canvas>
+        <p class="text-muted" id="trend-empty" style="text-align:center;padding:3rem 0;display:none;font-size:.875rem">Add modules in the Calculator to see your trend</p>
+      </div>
+      <div class="glass card">
+        <h3 class="font-semibold" style="margin-bottom:1.25rem;font-size:1.125rem">Quick Actions</h3>
+        <div class="space-y">
+          <button onclick="nav('calculator')" class="smooth" style="display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:.75rem;width:100%;border:none;background:none;cursor:pointer;color:inherit;text-align:left;" onmouseenter="this.style.background='rgba(99,102,241,.08)'" onmouseleave="this.style.background='none'">
+            <span class="feature-icon gradient-purple" style="margin:0;width:2.5rem;height:2.5rem;flex-shrink:0"><svg class="icon-sm" style="stroke:#fff" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+            <div><div class="font-medium">GPA Calculator</div><div class="text-muted" style="font-size:.8rem">Add or edit modules</div></div>
+          </button>
+          <button onclick="nav('comeback')" class="smooth" style="display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:.75rem;width:100%;border:none;background:none;cursor:pointer;color:inherit;text-align:left;" onmouseenter="this.style.background='rgba(99,102,241,.08)'" onmouseleave="this.style.background='none'">
+            <span class="feature-icon gradient-success" style="margin:0;width:2.5rem;height:2.5rem;flex-shrink:0"><svg class="icon-sm" style="stroke:#fff" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>
+            <div><div class="font-medium">Comeback Tracker</div><div class="text-muted" style="font-size:.8rem">Calculate recovery path</div></div>
+          </button>
+          <button onclick="nav('planner')" class="smooth" style="display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:.75rem;width:100%;border:none;background:none;cursor:pointer;color:inherit;text-align:left;" onmouseenter="this.style.background='rgba(99,102,241,.08)'" onmouseleave="this.style.background='none'">
+            <span class="feature-icon gradient-warning" style="margin:0;width:2.5rem;height:2.5rem;flex-shrink:0"><svg class="icon-sm" style="stroke:#fff" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            <div><div class="font-medium">Semester Planner</div><div class="text-muted" style="font-size:.8rem">Plan future semesters</div></div>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="glass card" id="dash-recent-wrap" style="margin-top:1.5rem;display:none">
+      <h3 class="font-semibold" style="margin-bottom:1.25rem;font-size:1.125rem">Recent Semesters</h3>
+      <div id="dash-recent" class="space-y"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CALCULATOR ═══ -->
+<div id="calculator-page" class="page">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem">
+    <div>
+      <h1 style="font-size:2.25rem;font-weight:700;margin-bottom:.25rem">GPA Calculator</h1>
+      <p class="text-muted">Track and calculate your academic performance</p>
+    </div>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+      <select id="inst-select" onchange="changeInstitution()" style="min-width:220px"></select>
+      <button class="btn" id="sim-toggle-btn" onclick="toggleSim()" style="background:var(--card);border:1px solid var(--border)">What If?</button>
+    </div>
+  </div>
+
+  <!-- Sim banner -->
+  <div class="sim-banner" id="sim-banner" style="display:none;margin-bottom:1rem">
+    <div>
+      <div class="font-semibold text-warning">Simulation Mode Active</div>
+      <div class="text-muted" style="font-size:.8rem">Test different grades to see potential outcomes</div>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button class="icon-btn save-btn" onclick="resetSim()" title="Reset simulation">
+        <svg class="icon" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.63"/></svg>
+      </button>
+      <button class="btn btn-success" onclick="saveSim()" style="display:flex;align-items:center;gap:.5rem">
+        <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save
+      </button>
+    </div>
+  </div>
+
+  <div class="grid-2" style="grid-template-columns:1fr 320px;align-items:start" id="calc-layout">
+    <!-- Left: semesters -->
+    <div>
+      <div class="sem-tabs" id="sem-tabs"></div>
+      <div class="glass card" id="modules-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <div style="display:flex;align-items:center;gap:.75rem">
+            <span class="font-semibold" id="active-sem-name" style="font-size:1.125rem"></span>
+            <span class="text-muted" style="font-size:.875rem" id="sem-gpa-label"></span>
+          </div>
+          <button class="icon-btn" onclick="deleteActiveSem()" title="Delete semester" id="del-sem-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+        <!-- column headers -->
+        <div class="module-row" style="font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground);padding:.25rem .75rem">
+          <span class="mod-name">Module Name</span><span>Credits</span><span>Grade</span><span></span>
+        </div>
+        <div id="modules-list"></div>
+        <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap">
+          <button class="dashed-btn" style="flex:1" onclick="addModule()">+ Add Module</button>
+          <button class="dashed-btn" style="flex:1" onclick="addSem()">+ Add Semester</button>
+        </div>
+      </div>
+      <div id="no-sem-state" class="glass empty-state" style="display:none">
+        <svg class="icon-lg text-muted" style="margin:0 auto 1rem;display:block" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <h2>No semesters yet</h2>
+        <p class="text-muted" style="margin-bottom:1.5rem">Add your first semester to start tracking</p>
+        <button class="btn btn-primary" onclick="addSem()">Add First Semester</button>
+      </div>
+    </div>
+
+    <!-- Right: GPA circle + stats -->
+    <div class="sticky-sidebar">
+      <div class="glass card">
+        <h3 class="font-semibold" style="font-size:1.125rem;margin-bottom:1.5rem" id="gpa-card-title">Current GPA</h3>
+        <div class="gpa-circle-wrap">
+          <div class="gpa-circle" id="gpa-circle-wrap">
+            <svg width="180" height="180" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="70" fill="none" stroke="var(--muted)" stroke-width="12"/>
+              <circle id="gpa-arc" cx="80" cy="80" r="70" fill="none" stroke="#10b981" stroke-width="12" stroke-linecap="round"
+                stroke-dasharray="439.82" stroke-dashoffset="439.82" style="transition:stroke-dashoffset .8s ease,stroke .4s"/>
+            </svg>
+            <div class="gpa-circle-text">
+              <div class="gpa-circle-num" id="gpa-num">0.00</div>
+              <div class="gpa-circle-sub" id="gpa-denom">/ 4.0</div>
+            </div>
+          </div>
+        </div>
+        <div class="glass-strong card-sm" style="border-radius:.75rem;margin-bottom:.75rem">
+          <div class="stat-label">Classification</div>
+          <div class="font-semibold" id="gpa-class">—</div>
+        </div>
+        <div class="grid-2" style="gap:.5rem;margin-bottom:.75rem">
+          <div class="card-sm" style="background:rgba(99,102,241,.08);border-radius:.75rem">
+            <div class="stat-label">Modules</div>
+            <div style="font-size:1.25rem;font-weight:700" id="total-mods">0</div>
+          </div>
+          <div class="card-sm" style="background:rgba(99,102,241,.08);border-radius:.75rem">
+            <div class="stat-label">Credits</div>
+            <div style="font-size:1.25rem;font-weight:700" id="total-creds">0</div>
+          </div>
+        </div>
+        <!-- Sim delta -->
+        <div id="sim-delta-box" style="display:none;padding:.875rem;border-radius:.75rem;background:rgba(245,158,11,.1);border:1px solid var(--warning);margin-bottom:.75rem">
+          <div class="stat-label text-warning">GPA Change</div>
+          <div style="font-size:1.5rem;font-weight:700" id="sim-delta">+0.00</div>
+        </div>
+        <!-- PDF export -->
+        <button class="btn btn-ghost" onclick="exportPDF()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.25rem">
+          <svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export PDF
+        </button>
+      </div>
+      <!-- Grade reference -->
+      <div class="glass card" style="margin-top:1rem">
+        <div class="font-semibold" style="margin-bottom:.75rem;font-size:.9rem">Grade Reference</div>
+        <div id="grade-ref" style="display:flex;flex-wrap:wrap;gap:.35rem;font-size:.75rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMEBACK ═══ -->
+<div id="comeback-page" class="page">
+  <h1 style="font-size:2.25rem;font-weight:700;margin-bottom:.25rem">Comeback Tracker</h1>
+  <p class="text-muted" style="margin-bottom:1.5rem">Calculate your academic recovery path</p>
+  <div id="comeback-no-data" class="glass empty-state" style="display:none">
+    <svg class="icon-lg text-warning" style="margin:0 auto 1rem;display:block" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <h2>No Data Found</h2>
+    <p class="text-muted">Add your modules in the calculator first.</p>
+  </div>
+  <div id="comeback-content" class="grid-2">
+    <div class="glass card space-y">
+      <div>
+        <h3 class="font-semibold" style="font-size:1.125rem;margin-bottom:1rem">Current Status</h3>
+        <div style="font-size:2.5rem;font-weight:700;margin-bottom:.25rem" id="cb-current-gpa">0.00</div>
+        <div class="text-muted" style="font-size:.875rem" id="cb-current-class">—</div>
+        <div class="grid-2" style="margin-top:1rem;gap:.5rem">
+          <div class="card-sm" style="background:rgba(99,102,241,.08);border-radius:.75rem"><div class="stat-label">Completed Credits</div><div style="font-size:1.25rem;font-weight:700" id="cb-creds">0</div></div>
+          <div class="card-sm" style="background:rgba(99,102,241,.08);border-radius:.75rem"><div class="stat-label">Max GPA</div><div style="font-size:1.25rem;font-weight:700" id="cb-max">4.0</div></div>
+        </div>
       </div>
       <div>
-        <button class="btn btn-ghost" onclick="runWhatIf()">Simulate</button>
+        <h3 class="font-semibold" style="font-size:1.125rem;margin-bottom:1rem">Target Settings</h3>
+        <div class="space-y">
+          <div><label class="field-label">Target GPA</label><input type="number" id="cb-target" value="3.5" step="0.1" min="0" oninput="calcComeback()"></div>
+          <div class="grid-2" style="gap:.5rem">
+            <div><label class="field-label">Remaining Semesters</label><input type="number" id="cb-sems" value="2" min="1" max="12" oninput="calcComeback()"></div>
+            <div><label class="field-label">Credits/Semester</label><input type="number" id="cb-cps" value="18" min="1" max="30" oninput="calcComeback()"></div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="whatif-result" id="whatifResult"></div>
+    <div class="glass card">
+      <h3 class="font-semibold" style="font-size:1.125rem;margin-bottom:1rem">Recovery Analysis</h3>
+      <div id="cb-result-box" style="padding:1.25rem;border-radius:.75rem;margin-bottom:1rem;border:2px solid var(--border)">
+        <div style="font-size:1.5rem;font-weight:700;margin-bottom:.5rem" id="cb-status">—</div>
+        <div id="cb-detail" style="font-size:.875rem" class="text-muted"></div>
+      </div>
+      <h4 class="font-semibold" style="margin-bottom:.75rem">GPA Projection</h4>
+      <canvas id="cb-chart" height="180"></canvas>
+      <div id="cb-sem-targets" style="margin-top:1rem" class="space-y"></div>
+    </div>
   </div>
+</div>
 
-</main>
+<!-- ═══ PLANNER ═══ -->
+<div id="planner-page" class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+    <div>
+      <h1 style="font-size:2.25rem;font-weight:700;margin-bottom:.25rem">Semester Planner</h1>
+      <p class="text-muted">Plan your future semesters strategically</p>
+    </div>
+    <button class="btn btn-primary" onclick="plannerAddSem()">+ Add Semester</button>
+  </div>
+  <div id="planner-empty" class="glass empty-state" style="display:none">
+    <svg class="icon-lg text-primary" style="margin:0 auto 1rem;display:block" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <h2>No semesters planned yet</h2>
+    <p class="text-muted" style="margin-bottom:1.5rem">Start planning your future semesters to optimize your workload</p>
+    <button class="btn btn-primary" onclick="plannerAddSem()">Plan Your First Semester</button>
+  </div>
+  <div id="planner-grid" class="planner-grid"></div>
+  <div class="glass card" id="planner-overview" style="margin-top:1.5rem;display:none">
+    <h3 class="font-semibold" style="margin-bottom:1rem;font-size:1.125rem">Workload Overview</h3>
+    <div class="grid-4">
+      <div class="card-sm" style="background:rgba(99,102,241,.08);border-radius:.75rem"><div class="stat-label">Total Semesters</div><div style="font-size:1.5rem;font-weight:700" id="pl-sems">0</div></div>
+      <div class="card-sm" style="background:rgba(99,102,241,.08);border-radius:.75rem"><div class="stat-label">Total Modules</div><div style="font-size:1.5rem;font-weight:700" id="pl-mods">0</div></div>
+      <div class="card-sm" style="background:rgba(99,102,241,.08);border-radius:.75rem"><div class="stat-label">Total Credits</div><div style="font-size:1.5rem;font-weight:700" id="pl-creds">0</div></div>
+      <div class="card-sm" style="background:rgba(99,102,241,.08);border-radius:.75rem"><div class="stat-label">Avg Stress</div><div style="font-size:1.5rem;font-weight:700" id="pl-stress">0%</div></div>
+    </div>
+  </div>
+</div>
 
-<footer>
-  <p>This calculator is for reference only. Always verify your GPA with your school's official system. Grade point values are based on each institution's published grading policy.</p>
-  <p style="margin-top:8px">Made for Singapore students · SP · NP · TP · RP · NYP · NUS · NTU · SMU · SUSS · SIT</p>
-</footer>
-
-<!-- AdSense placeholder (replace with real ad code) -->
-<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX" crossorigin="anonymous"></script> -->
+<!-- ═══ SETTINGS ═══ -->
+<div id="settings-page" class="page">
+  <h1 style="font-size:2.25rem;font-weight:700;margin-bottom:.25rem">Settings</h1>
+  <p class="text-muted" style="margin-bottom:1.5rem">Manage your Gradio preferences and data</p>
+  <div class="grid-2">
+    <div class="glass card space-y">
+      <h3 class="font-semibold" style="font-size:1.125rem">Data Management</h3>
+      <div>
+        <h4 class="font-medium" style="margin-bottom:.5rem">Export PDF Report</h4>
+        <p class="text-muted" style="font-size:.875rem;margin-bottom:.75rem">Download a formatted PDF of your GPA data</p>
+        <button class="btn btn-ghost" onclick="exportPDF()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem">
+          <svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export PDF
+        </button>
+      </div>
+      <div>
+        <h4 class="font-medium" style="margin-bottom:.5rem">Export JSON Backup</h4>
+        <p class="text-muted" style="font-size:.875rem;margin-bottom:.75rem">Download your raw GPA data as JSON</p>
+        <button class="btn btn-ghost" onclick="exportJSON()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem">
+          <svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export JSON
+        </button>
+      </div>
+      <div>
+        <h4 class="font-medium" style="margin-bottom:.5rem">Import Data</h4>
+        <p class="text-muted" style="font-size:.875rem;margin-bottom:.75rem">Restore from a previously exported JSON file</p>
+        <label class="btn btn-ghost" style="width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;cursor:pointer">
+          <svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import JSON
+          <input type="file" accept="application/json" onchange="importJSON(event)" style="display:none">
+        </label>
+      </div>
+      <div>
+        <h4 class="font-medium text-destructive" style="margin-bottom:.5rem">Clear All Data</h4>
+        <p class="text-muted" style="font-size:.875rem;margin-bottom:.75rem">Permanently delete all your GPA data</p>
+        <div id="clear-confirm" style="display:none" class="confirm-box">
+          <div style="display:flex;gap:.5rem;align-items:start">
+            <svg class="icon-sm text-destructive" style="flex-shrink:0;margin-top:.1rem" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div><div class="font-medium text-destructive">Are you sure?</div><div class="text-muted" style="font-size:.8rem;margin-top:.25rem">This cannot be undone. All data will be permanently deleted.</div></div>
+          </div>
+          <div class="confirm-btns">
+            <button class="btn btn-danger-solid" onclick="clearData()" style="flex:1">Yes, Delete Everything</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('clear-confirm').style.display='none'" style="flex:1">Cancel</button>
+          </div>
+        </div>
+        <button class="btn btn-danger" onclick="document.getElementById('clear-confirm').style.display='block'" style="width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem" id="clear-btn">
+          <svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Clear All Data
+        </button>
+      </div>
+    </div>
+    <div class="space-y">
+      <div class="glass card space-y">
+        <h3 class="font-semibold" style="font-size:1.125rem">About Gradio</h3>
+        <div class="card-sm" style="background:rgba(16,185,129,.08);border-radius:.75rem;display:flex;gap:.75rem;align-items:start">
+          <svg class="icon-sm text-success" style="flex-shrink:0;margin-top:.1rem" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <div><div class="font-medium" style="margin-bottom:.25rem">Privacy First</div><div class="text-muted" style="font-size:.8rem">All data stored locally. Nothing sent to any server.</div></div>
+        </div>
+        <div class="card-sm" style="background:rgba(16,185,129,.08);border-radius:.75rem;display:flex;gap:.75rem;align-items:start">
+          <svg class="icon-sm text-success" style="flex-shrink:0;margin-top:.1rem" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <div><div class="font-medium" style="margin-bottom:.25rem">No Login Required</div><div class="text-muted" style="font-size:.8rem">Start calculating immediately without an account.</div></div>
+        </div>
+        <div class="card-sm" style="background:rgba(16,185,129,.08);border-radius:.75rem;display:flex;gap:.75rem;align-items:start">
+          <svg class="icon-sm text-success" style="flex-shrink:0;margin-top:.1rem" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          <div><div class="font-medium" style="margin-bottom:.25rem">Accurate Grading</div><div class="text-muted" style="font-size:.8rem">All Singapore institutions supported, including SMU A+ = 4.3 and SUTD A+ = 5.3.</div></div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1rem">
+          <p class="text-muted" style="font-size:.875rem">Made with care for Singapore students</p>
+          <p class="text-muted" style="font-size:.75rem;margin-top:.25rem">Version 2.0.0</p>
+        </div>
+      </div>
+      <div class="glass card">
+        <h3 class="font-semibold" style="font-size:1.125rem;margin-bottom:1rem">Supported Institutions</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+          <div id="inst-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-const SCHOOLS = [
-  { id: 'sp',   name: 'SP',   full: 'Singapore Poly',    type: 'poly', scale: 4 },
-  { id: 'np',   name: 'NP',   full: 'Ngee Ann Poly',     type: 'poly', scale: 4 },
-  { id: 'tp',   name: 'TP',   full: 'Temasek Poly',      type: 'poly', scale: 4 },
-  { id: 'rp',   name: 'RP',   full: 'Republic Poly',     type: 'poly', scale: 4 },
-  { id: 'nyp',  name: 'NYP',  full: 'Nanyang Poly',      type: 'poly', scale: 4 },
-  { id: 'nus',  name: 'NUS',  full: 'Nat\'l Univ SG',   type: 'uni',  scale: 5 },
-  { id: 'ntu',  name: 'NTU',  full: 'Nanyang Tech Uni',  type: 'uni',  scale: 5 },
-  { id: 'smu',  name: 'SMU',  full: 'Singapore Mgmt Uni',type: 'uni',  scale: 4 },
-  { id: 'sit',  name: 'SIT',  full: 'SG Inst of Tech',   type: 'uni',  scale: 4 },
-  { id: 'suss', name: 'SUSS', full: 'SUSS',               type: 'uni',  scale: 4 },
-];
-
-const GRADES = {
-  4: [
-    { grade: 'A+', points: 4.0 }, { grade: 'A',  points: 4.0 },
-    { grade: 'A-', points: 3.7 }, { grade: 'B+', points: 3.3 },
-    { grade: 'B',  points: 3.0 }, { grade: 'B-', points: 2.7 },
-    { grade: 'C+', points: 2.3 }, { grade: 'C',  points: 2.0 },
-    { grade: 'C-', points: 1.7 }, { grade: 'D+', points: 1.3 },
-    { grade: 'D',  points: 1.0 }, { grade: 'F',  points: 0.0 },
-  ],
-  5: [
-    { grade: 'A+', points: 5.0 }, { grade: 'A',  points: 5.0 },
-    { grade: 'A-', points: 4.5 }, { grade: 'B+', points: 4.0 },
-    { grade: 'B',  points: 3.5 }, { grade: 'B-', points: 3.0 },
-    { grade: 'C+', points: 2.5 }, { grade: 'C',  points: 2.0 },
-    { grade: 'D+', points: 1.5 }, { grade: 'D',  points: 1.0 },
-    { grade: 'F',  points: 0.0 },
-  ]
+// ════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════
+const INSTITUTIONS = {
+  SP:  { name:'Singapore Polytechnic', maxGPA:4.0, grades:[
+    {g:'A',p:4.0,l:'A (80-100)'},{g:'B+',p:3.5,l:'B+ (75-79)'},{g:'B',p:3.0,l:'B (70-74)'},
+    {g:'C+',p:2.5,l:'C+ (65-69)'},{g:'C',p:2.0,l:'C (60-64)'},{g:'D+',p:1.5,l:'D+ (55-59)'},
+    {g:'D',p:1.0,l:'D (50-54)'},{g:'F',p:0.0,l:'F (0-49)'}]},
+  NP:  { name:'Ngee Ann Polytechnic', maxGPA:4.0, grades:[
+    {g:'A',p:4.0,l:'A (80-100)'},{g:'B+',p:3.5,l:'B+ (75-79)'},{g:'B',p:3.0,l:'B (70-74)'},
+    {g:'C+',p:2.5,l:'C+ (65-69)'},{g:'C',p:2.0,l:'C (60-64)'},{g:'D+',p:1.5,l:'D+ (55-59)'},
+    {g:'D',p:1.0,l:'D (50-54)'},{g:'F',p:0.0,l:'F (0-49)'}]},
+  TP:  { name:'Temasek Polytechnic', maxGPA:4.0, grades:[
+    {g:'A',p:4.0,l:'A (80-100)'},{g:'B+',p:3.5,l:'B+ (75-79)'},{g:'B',p:3.0,l:'B (70-74)'},
+    {g:'C+',p:2.5,l:'C+ (65-69)'},{g:'C',p:2.0,l:'C (60-64)'},{g:'D+',p:1.5,l:'D+ (55-59)'},
+    {g:'D',p:1.0,l:'D (50-54)'},{g:'F',p:0.0,l:'F (0-49)'}]},
+  NYP: { name:'Nanyang Polytechnic', maxGPA:4.0, grades:[
+    {g:'A',p:4.0,l:'A (80-100)'},{g:'B+',p:3.5,l:'B+ (75-79)'},{g:'B',p:3.0,l:'B (70-74)'},
+    {g:'C+',p:2.5,l:'C+ (65-69)'},{g:'C',p:2.0,l:'C (60-64)'},{g:'D+',p:1.5,l:'D+ (55-59)'},
+    {g:'D',p:1.0,l:'D (50-54)'},{g:'F',p:0.0,l:'F (0-49)'}]},
+  RP:  { name:'Republic Polytechnic', maxGPA:4.0, grades:[
+    {g:'A',p:4.0,l:'A (80-100)'},{g:'B+',p:3.5,l:'B+ (75-79)'},{g:'B',p:3.0,l:'B (70-74)'},
+    {g:'C+',p:2.5,l:'C+ (65-69)'},{g:'C',p:2.0,l:'C (60-64)'},{g:'D+',p:1.5,l:'D+ (55-59)'},
+    {g:'D',p:1.0,l:'D (50-54)'},{g:'F',p:0.0,l:'F (0-49)'}]},
+  NUS: { name:'National University of Singapore', maxGPA:5.0, grades:[
+    {g:'A+',p:5.0,l:'A+ (90-100)'},{g:'A',p:5.0,l:'A (85-89)'},{g:'A-',p:4.5,l:'A- (80-84)'},
+    {g:'B+',p:4.0,l:'B+ (75-79)'},{g:'B',p:3.5,l:'B (70-74)'},{g:'B-',p:3.0,l:'B- (65-69)'},
+    {g:'C+',p:2.5,l:'C+ (60-64)'},{g:'C',p:2.0,l:'C (55-59)'},{g:'D+',p:1.5,l:'D+ (50-54)'},
+    {g:'D',p:1.0,l:'D (45-49)'},{g:'F',p:0.0,l:'F (0-44)'}]},
+  NTU: { name:'Nanyang Technological University', maxGPA:5.0, grades:[
+    {g:'A+',p:5.0,l:'A+ (90-100)'},{g:'A',p:5.0,l:'A (85-89)'},{g:'A-',p:4.5,l:'A- (80-84)'},
+    {g:'B+',p:4.0,l:'B+ (75-79)'},{g:'B',p:3.5,l:'B (70-74)'},{g:'B-',p:3.0,l:'B- (65-69)'},
+    {g:'C+',p:2.5,l:'C+ (60-64)'},{g:'C',p:2.0,l:'C (55-59)'},{g:'D+',p:1.5,l:'D+ (50-54)'},
+    {g:'D',p:1.0,l:'D (45-49)'},{g:'F',p:0.0,l:'F (0-44)'}]},
+  // SMU: A+ = 4.3 (above standard 4.0)
+  SMU: { name:'Singapore Management University', maxGPA:4.3, grades:[
+    {g:'A+',p:4.3,l:'A+ (93-100)'},{g:'A',p:4.0,l:'A (85-92)'},{g:'A-',p:3.7,l:'A- (80-84)'},
+    {g:'B+',p:3.3,l:'B+ (75-79)'},{g:'B',p:3.0,l:'B (70-74)'},{g:'B-',p:2.7,l:'B- (65-69)'},
+    {g:'C+',p:2.3,l:'C+ (60-64)'},{g:'C',p:2.0,l:'C (55-59)'},{g:'D+',p:1.5,l:'D+ (50-54)'},
+    {g:'D',p:1.0,l:'D (45-49)'},{g:'F',p:0.0,l:'F (0-44)'}]},
+  // SUTD: A+ = 5.3 (above standard 5.0)
+  SUTD:{ name:'Singapore Univ of Technology & Design', maxGPA:5.3, grades:[
+    {g:'A+',p:5.3,l:'A+ (90-100)'},{g:'A',p:5.0,l:'A (85-89)'},{g:'A-',p:4.5,l:'A- (80-84)'},
+    {g:'B+',p:4.0,l:'B+ (75-79)'},{g:'B',p:3.5,l:'B (70-74)'},{g:'B-',p:3.0,l:'B- (65-69)'},
+    {g:'C+',p:2.5,l:'C+ (60-64)'},{g:'C',p:2.0,l:'C (55-59)'},{g:'D',p:1.0,l:'D (50-54)'},
+    {g:'F',p:0.0,l:'F (0-49)'}]},
+  SIT: { name:'Singapore Institute of Technology', maxGPA:5.0, grades:[
+    {g:'A+',p:5.0,l:'A+ (90-100)'},{g:'A',p:5.0,l:'A (85-89)'},{g:'A-',p:4.5,l:'A- (80-84)'},
+    {g:'B+',p:4.0,l:'B+ (75-79)'},{g:'B',p:3.5,l:'B (70-74)'},{g:'B-',p:3.0,l:'B- (65-69)'},
+    {g:'C+',p:2.5,l:'C+ (60-64)'},{g:'C',p:2.0,l:'C (55-59)'},{g:'D+',p:1.5,l:'D+ (50-54)'},
+    {g:'D',p:1.0,l:'D (45-49)'},{g:'F',p:0.0,l:'F (0-44)'}]},
+  SUSS:{ name:'Singapore Univ of Social Sciences', maxGPA:5.0, grades:[
+    {g:'A+',p:5.0,l:'A+ (90-100)'},{g:'A',p:5.0,l:'A (85-89)'},{g:'A-',p:4.5,l:'A- (80-84)'},
+    {g:'B+',p:4.0,l:'B+ (75-79)'},{g:'B',p:3.5,l:'B (70-74)'},{g:'B-',p:3.0,l:'B- (65-69)'},
+    {g:'C+',p:2.5,l:'C+ (60-64)'},{g:'C',p:2.0,l:'C (55-59)'},{g:'D+',p:1.5,l:'D+ (50-54)'},
+    {g:'D',p:1.0,l:'D (45-49)'},{g:'F',p:0.0,l:'F (0-44)'}]},
+  ITE: { name:'Institute of Technical Education', maxGPA:4.0, grades:[
+    {g:'A',p:4.0,l:'A (80-100)'},{g:'B',p:3.0,l:'B (70-79)'},{g:'C',p:2.0,l:'C (60-69)'},
+    {g:'D',p:1.0,l:'D (50-59)'},{g:'F',p:0.0,l:'F (0-49)'}]},
 };
 
-let selectedSchool = SCHOOLS[0];
-let semesters = [{ id: 1, label: 'Sem 1', modules: [] }];
-let activeSem = 0;
-let lastGpa = null;
-let lastTotalCredits = 0;
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let state = {
+  institution: 'SP',
+  semesters: [],   // [{id,name,modules:[{id,name,credits,grade}]}]
+};
+let activeSemIdx = 0;
+let simMode = false;
+let simState = null;
+let plannerSems = [];
 
-function init() {
-  renderSchools();
-  renderGrades();
-  renderSemTabs();
-  renderModules();
+function loadState() {
+  try {
+    const s = localStorage.getItem('gradio-data');
+    if (s) state = JSON.parse(s);
+    const p = localStorage.getItem('gradio-planner');
+    if (p) plannerSems = JSON.parse(p);
+  } catch(e) {}
 }
 
-function renderSchools() {
-  const grid = document.getElementById('schoolGrid');
-  grid.innerHTML = SCHOOLS.map(s => `
-    <button class="school-btn ${s.id === selectedSchool.id ? 'active' : ''}" onclick="selectSchool('${s.id}')">
-      <span class="school-name">${s.name}</span>
-      <span class="school-type">${s.type === 'poly' ? 'Poly · GPA 4.0' : 'Uni · GPA ' + s.scale + '.0'}</span>
-    </button>
-  `).join('');
-  document.getElementById('scaleBadge').textContent = `📊 Scale: ${selectedSchool.scale}.0 max`;
+function saveState() {
+  localStorage.setItem('gradio-data', JSON.stringify(state));
+  localStorage.setItem('gradio-planner', JSON.stringify(plannerSems));
 }
 
-function selectSchool(id) {
-  selectedSchool = SCHOOLS.find(s => s.id === id);
-  renderSchools();
-  renderGrades();
-  renderModules();
+function currentData() { return simMode ? simState : state; }
+
+// ════════════════════════════════════════════════
+//  GPA LOGIC
+// ════════════════════════════════════════════════
+function getPoints(grade, inst) {
+  const g = INSTITUTIONS[inst].grades.find(x => x.g === grade);
+  return g ? g.p : 0;
 }
 
-function renderGrades() {
-  const pills = document.getElementById('gradePills');
-  pills.innerHTML = GRADES[selectedSchool.scale].map(g =>
-    `<div class="grade-pill">${g.grade}<span>${g.points.toFixed(1)}</span></div>`
+function calcGPA(modules, inst) {
+  if (!modules.length) return 0;
+  let pts = 0, creds = 0;
+  modules.forEach(m => {
+    if (m.grade) { pts += getPoints(m.grade, inst) * (m.credits||0); creds += (m.credits||0); }
+  });
+  return creds > 0 ? parseFloat((pts/creds).toFixed(2)) : 0;
+}
+
+function getClassification(gpa, inst) {
+  const max = INSTITUTIONS[inst].maxGPA;
+  if (max <= 4.3) { // Poly/SMU
+    if (gpa >= max * 0.93) return 'Distinction';
+    if (gpa >= max * 0.75) return 'Merit';
+    if (gpa >= max * 0.5)  return 'Pass';
+    return 'At Risk';
+  } else { // Uni (5.0, 5.3)
+    if (gpa >= max * 0.9)  return 'First Class Honours';
+    if (gpa >= max * 0.8)  return 'Second Class Honours (Upper)';
+    if (gpa >= max * 0.7)  return 'Second Class Honours (Lower)';
+    if (gpa >= max * 0.6)  return 'Third Class Honours';
+    if (gpa >= max * 0.4)  return 'Pass';
+    return 'At Risk';
+  }
+}
+
+function getGPAColor(gpa, max) {
+  const r = gpa/max;
+  if (r >= 0.9) return '#10b981';
+  if (r >= 0.75) return '#6366f1';
+  if (r >= 0.6)  return '#f59e0b';
+  return '#ef4444';
+}
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+let currentPage = 'landing';
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(page + '-page').classList.add('active');
+  document.querySelectorAll('[data-page]').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+  const isLanding = page === 'landing';
+  document.getElementById('app-nav').style.display = isLanding ? 'none' : 'flex';
+  document.getElementById('mobile-nav').style.display = isLanding ? 'none' : 'flex';
+  currentPage = page;
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'calculator') renderCalculator();
+  if (page === 'comeback') renderComeback();
+  if (page === 'planner') renderPlanner();
+  if (page === 'settings') renderSettings();
+  window.scrollTo(0,0);
+}
+
+// ════════════════════════════════════════════════
+//  THEME
+// ════════════════════════════════════════════════
+function initTheme() {
+  const t = localStorage.getItem('gradio-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+  applyTheme(t);
+}
+function applyTheme(t) {
+  document.documentElement.classList.toggle('dark', t === 'dark');
+  localStorage.setItem('gradio-theme', t);
+  const icon = document.getElementById('theme-icon');
+  icon.innerHTML = t === 'dark'
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+function toggleTheme() {
+  const cur = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+}
+
+// ════════════════════════════════════════════════
+//  CALCULATOR
+// ════════════════════════════════════════════════
+function renderCalculator() {
+  const d = currentData();
+  const inst = INSTITUTIONS[d.institution];
+
+  // Populate institution dropdown
+  const sel = document.getElementById('inst-select');
+  sel.innerHTML = Object.entries(INSTITUTIONS).map(([k,v]) =>
+    `<option value="${k}" ${k===d.institution?'selected':''}>${v.name}</option>`
+  ).join('');
+
+  // Grade reference
+  document.getElementById('grade-ref').innerHTML = inst.grades.map(g =>
+    `<span style="padding:.2rem .5rem;border-radius:.375rem;background:rgba(99,102,241,.1);font-size:.7rem">${g.g} <span class="text-primary">${g.p}</span></span>`
+  ).join('');
+
+  updateSemTabs();
+  updateModulesPanel();
+  updateGPACircle();
+}
+
+function changeInstitution() {
+  const val = document.getElementById('inst-select').value;
+  state.institution = val;
+  if (simState) simState.institution = val;
+  saveState();
+  renderCalculator();
+}
+
+function updateSemTabs() {
+  const d = currentData();
+  const tabs = document.getElementById('sem-tabs');
+  if (!d.semesters.length) { tabs.innerHTML = ''; return; }
+  tabs.innerHTML = d.semesters.map((s,i) =>
+    `<button class="sem-tab ${i===activeSemIdx?'active':''}" onclick="switchSem(${i})">${s.name}
+      ${d.semesters.length>1?`<span class="sem-tab-del" onclick="event.stopPropagation();deleteSem(${i})">✕</span>`:''}
+    </button>`
   ).join('');
 }
 
-function renderSemTabs() {
-  const tabs = document.getElementById('semTabs');
-  tabs.innerHTML = semesters.map((s, i) => `
-    <button class="sem-tab ${i === activeSem ? 'active' : ''}" onclick="switchSem(${i})">${s.label}
-      ${semesters.length > 1 ? `<button class="sem-delete" onclick="deleteSem(event,${i})">✕</button>` : ''}
-    </button>
-  `).join('');
-  tabs.innerHTML += `<button class="add-sem-btn" onclick="addSem()">+ Add Sem</button>`;
-}
-
 function switchSem(i) {
-  activeSem = i;
-  renderSemTabs();
-  renderModules();
+  activeSemIdx = i;
+  updateSemTabs();
+  updateModulesPanel();
 }
 
 function addSem() {
-  const n = semesters.length + 1;
-  semesters.push({ id: n, label: `Sem ${n}`, modules: [] });
-  activeSem = semesters.length - 1;
-  renderSemTabs();
-  renderModules();
+  const n = state.semesters.length + 1;
+  const newSem = {id: Date.now().toString(), name: `Semester ${n}`, modules:[]};
+  state.semesters.push(newSem);
+  if (simState) simState.semesters.push({...newSem, modules:[]});
+  activeSemIdx = state.semesters.length - 1;
+  saveState();
+  updateSemTabs();
+  updateModulesPanel();
+  updateGPACircle();
 }
 
-function deleteSem(e, i) {
-  e.stopPropagation();
-  if (semesters.length === 1) return;
-  semesters.splice(i, 1);
-  activeSem = Math.min(activeSem, semesters.length - 1);
-  renderSemTabs();
-  renderModules();
+function deleteSem(i) {
+  if (state.semesters.length <= 1) return;
+  state.semesters.splice(i, 1);
+  if (simState) simState.semesters.splice(i, 1);
+  activeSemIdx = Math.min(activeSemIdx, state.semesters.length - 1);
+  saveState();
+  updateSemTabs();
+  updateModulesPanel();
+  updateGPACircle();
 }
 
-function renderModules() {
-  const tbody = document.getElementById('moduleBody');
-  const sem = semesters[activeSem];
-  if (sem.modules.length === 0) {
-    sem.modules = [
-      { name: '', credits: 4, grade: 'A' },
-      { name: '', credits: 4, grade: 'B+' },
-      { name: '', credits: 4, grade: 'B' },
-    ];
+function deleteActiveSem() { deleteSem(activeSemIdx); }
+
+function updateModulesPanel() {
+  const d = currentData();
+  const noSem = document.getElementById('no-sem-state');
+  const panel = document.getElementById('modules-panel');
+  const delBtn = document.getElementById('del-sem-btn');
+
+  if (!d.semesters.length) {
+    noSem.style.display = 'block'; panel.style.display = 'none'; return;
   }
-  tbody.innerHTML = sem.modules.map((m, i) => `
-    <tr>
-      <td><input type="text" placeholder="e.g. Mathematics" value="${m.name}" oninput="updateModule(${i},'name',this.value)"></td>
-      <td><input type="number" min="1" max="12" value="${m.credits}" oninput="updateModule(${i},'credits',this.value)"></td>
-      <td>
-        <select onchange="updateModule(${i},'grade',this.value)">
-          ${GRADES[selectedSchool.scale].map(g =>
-            `<option value="${g.grade}" ${g.grade === m.grade ? 'selected' : ''}>${g.grade} (${g.points.toFixed(1)})</option>`
-          ).join('')}
-        </select>
-      </td>
-      <td><button class="delete-btn" onclick="removeModule(${i})">×</button></td>
-    </tr>
+  noSem.style.display = 'none'; panel.style.display = 'block';
+
+  const sem = d.semesters[activeSemIdx] || d.semesters[0];
+  const semGPA = calcGPA(sem.modules, d.institution);
+  document.getElementById('active-sem-name').textContent = sem.name;
+  document.getElementById('sem-gpa-label').textContent = sem.modules.length ? `GPA: ${semGPA.toFixed(2)}` : '';
+  delBtn.style.display = d.semesters.length > 1 ? 'flex' : 'none';
+
+  const list = document.getElementById('modules-list');
+  const inst = INSTITUTIONS[d.institution];
+  list.innerHTML = sem.modules.map((m,mi) => `
+    <div class="module-row" id="mod-${mi}">
+      <input class="mod-name" type="text" value="${m.name||''}" placeholder="Module name"
+        style="background:var(--input-bg);border:1px solid var(--border);border-radius:.5rem;padding:.4rem .6rem;font-size:.875rem;color:var(--foreground)"
+        oninput="updateMod(${mi},'name',this.value)">
+      <input type="number" value="${m.credits||3}" min="1" max="12"
+        style="background:var(--input-bg);border:1px solid var(--border);border-radius:.5rem;padding:.4rem .6rem;font-size:.875rem;color:var(--foreground);text-align:center"
+        oninput="updateMod(${mi},'credits',+this.value)">
+      <select style="background:var(--input-bg);border:1px solid var(--border);border-radius:.5rem;padding:.4rem .6rem;font-size:.875rem;color:var(--foreground)"
+        onchange="updateMod(${mi},'grade',this.value)">
+        <option value="">Grade</option>
+        ${inst.grades.map(g=>`<option value="${g.g}" ${g.g===m.grade?'selected':''}>${g.l}</option>`).join('')}
+      </select>
+      <button class="icon-btn" onclick="deleteMod(${mi})">
+        <svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>
   `).join('');
 }
 
-function updateModule(i, field, val) {
-  semesters[activeSem].modules[i][field] = field === 'credits' ? parseFloat(val) || 0 : val;
+function updateMod(mi, field, val) {
+  const d = currentData();
+  const sem = d.semesters[activeSemIdx];
+  if (!sem) return;
+  sem.modules[mi][field] = val;
+  if (!simMode) saveState();
+  updateGPACircle();
+  document.getElementById('sem-gpa-label').textContent = `GPA: ${calcGPA(sem.modules, d.institution).toFixed(2)}`;
 }
 
 function addModule() {
-  semesters[activeSem].modules.push({ name: '', credits: 4, grade: 'B' });
-  renderModules();
+  const d = currentData();
+  if (!d.semesters.length) { addSem(); return; }
+  d.semesters[activeSemIdx].modules.push({id:Date.now().toString(),name:'',credits:3,grade:''});
+  if (!simMode) saveState();
+  updateModulesPanel();
+  updateGPACircle();
 }
 
-function removeModule(i) {
-  semesters[activeSem].modules.splice(i, 1);
-  renderModules();
+function deleteMod(mi) {
+  const d = currentData();
+  d.semesters[activeSemIdx].modules.splice(mi,1);
+  if (!simMode) saveState();
+  updateModulesPanel();
+  updateGPACircle();
 }
 
-function addPreset() {
-  const preset = [
-    { name: 'Mathematics', credits: 4, grade: 'B+' },
-    { name: 'Communications', credits: 3, grade: 'A-' },
-    { name: 'Core Module 1', credits: 4, grade: 'B' },
-    { name: 'Core Module 2', credits: 4, grade: 'B+' },
-    { name: 'Elective', credits: 3, grade: 'A' },
-  ];
-  semesters[activeSem].modules = [...preset];
-  renderModules();
-}
+function updateGPACircle() {
+  const d = currentData();
+  const allMods = d.semesters.flatMap(s=>s.modules);
+  const gpa = calcGPA(allMods, d.institution);
+  const max = INSTITUTIONS[d.institution].maxGPA;
+  const circ = 2 * Math.PI * 70;
+  const offset = circ - (gpa/max) * circ;
 
-function getPoints(grade) {
-  return (GRADES[selectedSchool.scale].find(g => g.grade === grade) || { points: 0 }).points;
-}
+  document.getElementById('gpa-num').textContent = gpa.toFixed(2);
+  document.getElementById('gpa-denom').textContent = `/ ${max.toFixed(1)}`;
+  document.getElementById('gpa-class').textContent = getClassification(gpa, d.institution);
+  document.getElementById('total-mods').textContent = allMods.length;
+  document.getElementById('total-creds').textContent = allMods.reduce((s,m)=>s+(m.credits||0),0);
 
-function calculate() {
-  let totalPoints = 0, totalCredits = 0;
+  const arc = document.getElementById('gpa-arc');
+  arc.setAttribute('stroke-dasharray', circ.toFixed(2));
+  arc.setAttribute('stroke-dashoffset', offset.toFixed(2));
+  arc.setAttribute('stroke', getGPAColor(gpa, max));
 
-  // Cumulative across all sems
-  semesters.forEach(sem => {
-    sem.modules.forEach(m => {
-      const cr = parseFloat(m.credits) || 0;
-      totalPoints += getPoints(m.grade) * cr;
-      totalCredits += cr;
-    });
-  });
+  document.getElementById('gpa-card-title').textContent = simMode ? 'Simulated GPA' : 'Current GPA';
 
-  // Current sem only
-  const curSem = semesters[activeSem];
-  let semPoints = 0, semCredits = 0;
-  curSem.modules.forEach(m => {
-    const cr = parseFloat(m.credits) || 0;
-    semPoints += getPoints(m.grade) * cr;
-    semCredits += cr;
-  });
-
-  const cgpa = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
-  const sgpa = semCredits > 0 ? (semPoints / semCredits) : 0;
-  lastGpa = cgpa;
-  lastTotalCredits = totalCredits;
-
-  const scale = selectedSchool.scale;
-  const pct = (cgpa / scale) * 100;
-
-  const grid = document.getElementById('resultsGrid');
-  grid.style.display = 'grid';
-  grid.innerHTML = `
-    <div class="result-card highlight">
-      <div class="result-label">Cumulative GPA</div>
-      <div class="result-value">${cgpa.toFixed(2)}</div>
-      <div class="result-sub">out of ${scale}.00 · ${getClass(cgpa, scale)}</div>
-    </div>
-    <div class="result-card">
-      <div class="result-label">This Semester</div>
-      <div class="result-value" style="color:var(--accent2)">${sgpa.toFixed(2)}</div>
-      <div class="result-sub">${semCredits} credit units</div>
-    </div>
-    <div class="result-card">
-      <div class="result-label">Total Credits</div>
-      <div class="result-value" style="color:var(--text);font-size:24px">${totalCredits}</div>
-      <div class="result-sub">across ${semesters.length} sem(s)</div>
-    </div>
-    <div class="result-card">
-      <div class="result-label">Grade Points</div>
-      <div class="result-value" style="color:var(--text);font-size:24px">${totalPoints.toFixed(1)}</div>
-      <div class="result-sub">quality points total</div>
-    </div>
-  `;
-
-  const bar = document.getElementById('gpaBarWrap');
-  bar.style.display = 'block';
-  document.getElementById('gpaBarFill').style.width = Math.min(pct, 100) + '%';
-  document.getElementById('gpaBarMarkers').innerHTML = `
-    <span class="gpa-marker">0.0</span>
-    <span class="gpa-marker">${(scale*0.5).toFixed(1)}</span>
-    <span class="gpa-marker">${scale}.0</span>
-  `;
-}
-
-function getClass(gpa, scale) {
-  const ratio = gpa / scale;
-  if (ratio >= 0.9) return '🏆 Distinction';
-  if (ratio >= 0.75) return '⭐ Merit';
-  if (ratio >= 0.6) return '✅ Pass with Credit';
-  if (ratio >= 0.5) return 'Pass';
-  return '⚠️ At Risk';
-}
-
-function runWhatIf() {
-  const target = parseFloat(document.getElementById('targetGpa').value);
-  const nextCr = parseFloat(document.getElementById('nextCredits').value);
-  const res = document.getElementById('whatifResult');
-
-  if (!target || !nextCr) {
-    res.className = 'whatif-result show';
-    res.innerHTML = 'Please fill in both fields first.';
-    return;
-  }
-
-  if (lastGpa === null) {
-    res.className = 'whatif-result show';
-    res.innerHTML = 'Calculate your GPA first, then run the simulator.';
-    return;
-  }
-
-  const scale = selectedSchool.scale;
-  const needed = ((target * (lastTotalCredits + nextCr)) - (lastGpa * lastTotalCredits)) / nextCr;
-
-  res.className = 'whatif-result show';
-
-  if (needed > scale) {
-    res.innerHTML = `To reach a GPA of <strong>${target.toFixed(2)}</strong>, you'd need <strong>${needed.toFixed(2)} grade points</strong> per credit — which exceeds the ${scale}.0 max. That target isn't achievable in one semester from your current standing.`;
-  } else if (needed < 0) {
-    res.innerHTML = `You've already exceeded a GPA of <strong>${target.toFixed(2)}</strong>. Your current CGPA is <strong>${lastGpa.toFixed(2)}</strong>. You can coast next sem and still hit it.`;
+  // Sim delta
+  if (simMode) {
+    const realAllMods = state.semesters.flatMap(s=>s.modules);
+    const realGPA = calcGPA(realAllMods, state.institution);
+    const delta = gpa - realGPA;
+    document.getElementById('sim-delta').textContent = (delta >= 0 ? '+' : '') + delta.toFixed(2);
+    document.getElementById('sim-delta-box').style.display = 'block';
   } else {
-    const nearest = GRADES[scale].find(g => g.points >= needed) || GRADES[scale][GRADES[scale].length - 2];
-    res.innerHTML = `To reach <strong>${target.toFixed(2)} GPA</strong>, you need an average of <strong>${needed.toFixed(2)} grade points</strong> per credit next sem — roughly a <strong>${nearest.grade}</strong> average across all ${nextCr} credits.`;
+    document.getElementById('sim-delta-box').style.display = 'none';
   }
 }
 
-init();
+// ════════════════════════════════════════════════
+//  SIMULATION MODE
+// ════════════════════════════════════════════════
+function toggleSim() {
+  if (!simMode) {
+    simState = JSON.parse(JSON.stringify(state));
+    simMode = true;
+    document.getElementById('sim-banner').style.display = 'flex';
+    document.getElementById('sim-toggle-btn').textContent = 'Exit What If?';
+    document.getElementById('sim-toggle-btn').style.background = 'linear-gradient(135deg,#f59e0b,#fbbf24)';
+    document.getElementById('sim-toggle-btn').style.color = '#fff';
+    document.getElementById('sim-toggle-btn').style.border = 'none';
+  } else {
+    simMode = false; simState = null;
+    document.getElementById('sim-banner').style.display = 'none';
+    document.getElementById('sim-toggle-btn').textContent = 'What If?';
+    document.getElementById('sim-toggle-btn').style = 'background:var(--card);border:1px solid var(--border)';
+  }
+  renderCalculator();
+}
+function resetSim() { simState = JSON.parse(JSON.stringify(state)); renderCalculator(); }
+function saveSim() { state = JSON.parse(JSON.stringify(simState)); saveState(); toggleSim(); }
+
+// ════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════
+function renderDashboard() {
+  const allMods = state.semesters.flatMap(s=>s.modules);
+  const gpa = calcGPA(allMods, state.institution);
+  const max = INSTITUTIONS[state.institution].maxGPA;
+  const inst = INSTITUTIONS[state.institution];
+
+  const empty = !allMods.length && !state.semesters.length;
+  document.getElementById('dash-empty').style.display = empty ? 'block' : 'none';
+  document.getElementById('dash-content').style.display = empty ? 'none' : 'block';
+  document.getElementById('dash-school-name').textContent = inst.name;
+
+  document.getElementById('dash-gpa').textContent = gpa.toFixed(2);
+  document.getElementById('dash-class').textContent = getClassification(gpa, state.institution);
+  document.getElementById('dash-mods').textContent = allMods.length;
+  document.getElementById('dash-credits').textContent = allMods.reduce((s,m)=>s+(m.credits||0),0) + ' Credits';
+  document.getElementById('dash-sems').textContent = state.semesters.length;
+  document.getElementById('dash-pct').textContent = max > 0 ? Math.round((gpa/max)*100)+'%' : '0%';
+
+  // Trend chart
+  const trendData = state.semesters.map(s => ({name:s.name, gpa:calcGPA(s.modules, state.institution)}));
+  const emptyTrend = document.getElementById('trend-empty');
+  const canvas = document.getElementById('trend-chart');
+  if (!trendData.length) { emptyTrend.style.display='block'; canvas.style.display='none'; }
+  else { emptyTrend.style.display='none'; canvas.style.display='block'; drawLineChart(canvas, trendData, max); }
+
+  // Recent sems
+  const recentWrap = document.getElementById('dash-recent-wrap');
+  const recentEl = document.getElementById('dash-recent');
+  const recent = [...state.semesters].reverse().slice(0,3);
+  if (recent.length) {
+    recentWrap.style.display='block';
+    recentEl.innerHTML = recent.map(s => {
+      const sg = calcGPA(s.modules, state.institution);
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.875rem;border-radius:.75rem;background:rgba(99,102,241,.05)">
+        <div>
+          <div class="font-medium">${s.name}</div>
+          <div class="text-muted" style="font-size:.8rem">${s.modules.length} modules · ${s.modules.reduce((x,m)=>x+(m.credits||0),0)} credits</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:1.5rem;font-weight:700">${sg.toFixed(2)}</div>
+          <div class="text-muted" style="font-size:.75rem">GPA</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else { recentWrap.style.display='none'; }
+}
+
+// ════════════════════════════════════════════════
+//  CHARTS (canvas)
+// ════════════════════════════════════════════════
+function drawLineChart(canvas, data, maxVal) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 400;
+  canvas.width = W; canvas.height = 200;
+  const pad = {t:20,r:20,b:40,l:40};
+  const w = W - pad.l - pad.r, h = 200 - pad.t - pad.b;
+  ctx.clearRect(0,0,W,200);
+
+  const isDark = document.documentElement.classList.contains('dark');
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const textColor = isDark ? '#94a3b8' : '#64748b';
+
+  // Grid lines
+  for (let i=0; i<=4; i++) {
+    const y = pad.t + h - (i/4)*h;
+    ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+w,y); ctx.stroke();
+    ctx.fillStyle = textColor; ctx.font = '11px system-ui'; ctx.textAlign = 'right';
+    ctx.fillText(((i/4)*maxVal).toFixed(1), pad.l-6, y+4);
+  }
+
+  if (data.length < 2) {
+    // Single point
+    const x = pad.l + w/2, y = pad.t + h - (data[0].gpa/maxVal)*h;
+    ctx.fillStyle = '#6366f1'; ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = textColor; ctx.textAlign = 'center'; ctx.font='11px system-ui';
+    ctx.fillText(data[0].name, x, pad.t+h+18);
+    return;
+  }
+
+  const step = w / (data.length-1);
+  // Line
+  ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  data.forEach((d,i) => {
+    const x = pad.l + i*step, y = pad.t + h - (d.gpa/maxVal)*h;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // Dots + labels
+  data.forEach((d,i) => {
+    const x = pad.l + i*step, y = pad.t + h - (d.gpa/maxVal)*h;
+    ctx.fillStyle = '#6366f1'; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x,y,2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = textColor; ctx.textAlign = 'center'; ctx.font = '10px system-ui';
+    ctx.fillText(d.name.length>8 ? d.name.slice(0,7)+'…' : d.name, x, pad.t+h+18);
+  });
+}
+
+// ════════════════════════════════════════════════
+//  COMEBACK
+// ════════════════════════════════════════════════
+function renderComeback() {
+  const allMods = state.semesters.flatMap(s=>s.modules);
+  const gpa = calcGPA(allMods, state.institution);
+  const max = INSTITUTIONS[state.institution].maxGPA;
+  const noData = !allMods.length;
+  document.getElementById('comeback-no-data').style.display = noData ? 'block' : 'none';
+  document.getElementById('comeback-content').style.display = noData ? 'none' : 'grid';
+  if (noData) return;
+
+  document.getElementById('cb-current-gpa').textContent = gpa.toFixed(2);
+  document.getElementById('cb-current-class').textContent = getClassification(gpa, state.institution);
+  document.getElementById('cb-creds').textContent = allMods.reduce((s,m)=>s+(m.credits||0),0);
+  document.getElementById('cb-max').textContent = max.toFixed(1);
+  document.getElementById('cb-target').max = max;
+  if (!document.getElementById('cb-target').value) document.getElementById('cb-target').value = (max*0.85).toFixed(1);
+  calcComeback();
+}
+
+function calcComeback() {
+  const allMods = state.semesters.flatMap(s=>s.modules);
+  const gpa = calcGPA(allMods, state.institution);
+  const max = INSTITUTIONS[state.institution].maxGPA;
+  const completedCreds = allMods.reduce((s,m)=>s+(m.credits||0),0);
+  const target = parseFloat(document.getElementById('cb-target').value)||0;
+  const remSems = parseInt(document.getElementById('cb-sems').value)||1;
+  const cps = parseInt(document.getElementById('cb-cps').value)||18;
+  const remCreds = remSems * cps;
+
+  const required = ((target*(completedCreds+remCreds)) - (gpa*completedCreds)) / remCreds;
+  const possible = required <= max && required >= 0;
+
+  const box = document.getElementById('cb-result-box');
+  const status = document.getElementById('cb-status');
+  const detail = document.getElementById('cb-detail');
+
+  if (gpa >= target) {
+    box.style.border = '2px solid var(--success)'; box.style.background = 'rgba(16,185,129,.08)';
+    status.className = 'text-success'; status.textContent = '🔒 Locked In';
+    detail.textContent = "You've already hit your target. Keep it up.";
+  } else if (!possible) {
+    box.style.border = '2px solid var(--destructive)'; box.style.background = 'rgba(239,68,68,.08)';
+    status.className = 'text-destructive'; status.textContent = '💀 Need Academic Weapon Mode';
+    detail.textContent = `Target GPA of ${target.toFixed(2)} is not achievable with the given parameters. Try adjusting remaining semesters or your target.`;
+  } else {
+    const urgency = required/max;
+    box.style.border = '2px solid var(--warning)'; box.style.background = 'rgba(245,158,11,.08)';
+    status.className = 'text-warning';
+    status.textContent = urgency >= 0.95 ? '⚠️ One Bad Sem Away' : urgency >= 0.8 ? '💪 Grind Required' : '✅ Recoverable';
+    detail.innerHTML = `You need an average of <strong>${required.toFixed(2)}</strong> GPA per semester over the next ${remSems} semester(s) to reach <strong>${getClassification(target, state.institution)}</strong>.`;
+  }
+
+  // Projection chart
+  const projData = [{name:'Now', gpa}];
+  for (let i=1; i<=remSems; i++) {
+    const proj = possible ? Math.min((gpa*completedCreds + required*cps*i)/(completedCreds+cps*i), max) : gpa;
+    projData.push({name:`+${i}`, gpa: parseFloat(proj.toFixed(2))});
+  }
+  const cbCanvas = document.getElementById('cb-chart');
+  cbCanvas.width = cbCanvas.offsetWidth || 400;
+  drawLineChart(cbCanvas, projData, max);
+
+  // Sem targets
+  const targets = document.getElementById('cb-sem-targets');
+  targets.innerHTML = Array.from({length:remSems},(_,i)=>`
+    <div style="padding:.875rem;border-radius:.75rem;background:rgba(99,102,241,.06)">
+      <div class="stat-label">Semester ${i+1} target</div>
+      <div style="font-size:1.25rem;font-weight:700">${possible ? required.toFixed(2) : 'N/A'}</div>
+      <div class="prog-track" style="margin-top:.5rem"><div class="prog-fill" style="width:${possible?(required/max*100).toFixed(0):0}%;background:${possible&&required>=max*0.9?'var(--destructive)':possible&&required>=max*0.75?'var(--warning)':'var(--success)'}"></div></div>
+    </div>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════
+//  PLANNER
+// ════════════════════════════════════════════════
+function renderPlanner() {
+  const empty = !plannerSems.length;
+  document.getElementById('planner-empty').style.display = empty ? 'block' : 'none';
+  document.getElementById('planner-overview').style.display = empty ? 'none' : 'block';
+  const grid = document.getElementById('planner-grid');
+  grid.innerHTML = plannerSems.map((sem,si) => {
+    const stress = calcStress(sem);
+    const tc = sem.modules.reduce((s,m)=>s+(m.credits||0),0);
+    return `<div class="glass planner-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <input type="text" value="${sem.name}" style="font-size:1.125rem;font-weight:600;background:none;border:none;outline:none;color:inherit;flex:1"
+          oninput="plannerSems[${si}].name=this.value;savePlanner()">
+        <button class="icon-btn" onclick="plannerDelSem(${si})">
+          <svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.4rem">
+          <span class="text-muted">Stress Level</span><span>${Math.round(stress*100)}%</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:${Math.round(stress*100)}%;background:${stressColor(stress)}"></div></div>
+        <div style="font-size:.75rem;margin-top:.4rem" class="text-muted">${stressLabel(stress)}</div>
+      </div>
+      <div class="space-y-sm" style="flex:1">
+        ${sem.modules.map((m,mi)=>`
+          <div style="padding:.625rem;border-radius:.625rem;background:rgba(99,102,241,.06)">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">
+              <input type="text" value="${m.name||''}" placeholder="Module name" style="flex:1;background:none;border:none;outline:none;font-size:.875rem;color:inherit"
+                oninput="plannerSems[${si}].modules[${mi}].name=this.value;savePlanner()">
+              <button class="icon-btn" onclick="plannerDelMod(${si},${mi})"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem">
+              <div><div style="font-size:.65rem" class="text-muted">Credits</div>
+                <input type="number" value="${m.credits||3}" min="1" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:.375rem;padding:.2rem .4rem;font-size:.8rem;color:inherit"
+                  oninput="plannerSems[${si}].modules[${mi}].credits=+this.value;savePlanner();renderPlanner()">
+              </div>
+              <div><div style="font-size:.65rem" class="text-muted">Difficulty</div>
+                <select style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:.375rem;padding:.2rem .4rem;font-size:.8rem;color:inherit"
+                  onchange="plannerSems[${si}].modules[${mi}].difficulty=this.value;savePlanner();renderPlanner()">
+                  <option ${m.difficulty==='easy'?'selected':''} value="easy">Easy</option>
+                  <option ${m.difficulty==='medium'?'selected':''} value="medium">Med</option>
+                  <option ${m.difficulty==='hard'?'selected':''} value="hard">Hard</option>
+                </select>
+              </div>
+              <div><div style="font-size:.65rem" class="text-muted">Type</div>
+                <select style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:.375rem;padding:.2rem .4rem;font-size:.8rem;color:inherit"
+                  onchange="plannerSems[${si}].modules[${mi}].type=this.value;savePlanner()">
+                  <option ${m.type==='theory'?'selected':''} value="theory">Theory</option>
+                  <option ${m.type==='project'?'selected':''} value="project">Project</option>
+                  <option ${m.type==='lab'?'selected':''} value="lab">Lab</option>
+                </select>
+              </div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:.75rem;margin-top:.75rem">
+        <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:.5rem">
+          <span class="text-muted">Total Credits</span><span class="font-semibold">${tc}</span>
+        </div>
+        <button class="dashed-btn" onclick="plannerAddMod(${si})">+ Add Module</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Overview stats
+  if (!empty) {
+    const allPMods = plannerSems.flatMap(s=>s.modules);
+    const avgStress = plannerSems.reduce((s,sem)=>s+calcStress(sem),0)/plannerSems.length;
+    document.getElementById('pl-sems').textContent = plannerSems.length;
+    document.getElementById('pl-mods').textContent = allPMods.length;
+    document.getElementById('pl-creds').textContent = allPMods.reduce((s,m)=>s+(m.credits||0),0);
+    document.getElementById('pl-stress').textContent = Math.round(avgStress*100)+'%';
+  }
+}
+
+function calcStress(sem) {
+  const tc = sem.modules.reduce((s,m)=>s+(m.credits||0),0);
+  const hard = sem.modules.filter(m=>m.difficulty==='hard').length;
+  const med  = sem.modules.filter(m=>m.difficulty==='medium').length;
+  const proj = sem.modules.filter(m=>m.type==='project').length;
+  return Math.min((hard*3+med*2+tc/6+proj*1.5)/10,1);
+}
+function stressColor(l) { return l<0.3?'var(--success)':l<0.6?'var(--warning)':'var(--destructive)'; }
+function stressLabel(l) { return l<0.3?'Balanced semester':l<0.6?'Moderate workload':l<0.8?'High burnout risk':'Heavy finals workload detected'; }
+
+function plannerAddSem() {
+  plannerSems.push({id:Date.now().toString(), name:`Semester ${plannerSems.length+1}`, modules:[]});
+  savePlanner(); renderPlanner();
+}
+function plannerDelSem(i) { plannerSems.splice(i,1); savePlanner(); renderPlanner(); }
+function plannerAddMod(si) {
+  plannerSems[si].modules.push({id:Date.now().toString(),name:'',credits:3,difficulty:'medium',type:'theory'});
+  savePlanner(); renderPlanner();
+}
+function plannerDelMod(si,mi) { plannerSems[si].modules.splice(mi,1); savePlanner(); renderPlanner(); }
+function savePlanner() { localStorage.setItem('gradio-planner', JSON.stringify(plannerSems)); }
+
+// ════════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════════
+function renderSettings() {
+  const list = document.getElementById('inst-list');
+  list.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.5rem;grid-column:1/-1';
+  list.innerHTML = Object.entries(INSTITUTIONS).map(([k,v])=>`
+    <div style="padding:.625rem;border-radius:.625rem;background:rgba(99,102,241,.06)">
+      <div class="font-medium" style="font-size:.875rem">${k}</div>
+      <div class="text-muted" style="font-size:.75rem">${v.name}</div>
+      <div class="text-primary" style="font-size:.75rem;margin-top:.2rem">Max GPA: ${v.maxGPA}</div>
+    </div>`).join('');
+}
+
+function exportJSON() {
+  const data = localStorage.getItem('gradio-data');
+  if (!data) { alert('No data to export'); return; }
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `gradio-backup-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(e) {
+  const file = e.target.files?.[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      localStorage.setItem('gradio-data', JSON.stringify(d));
+      alert('Data imported successfully!'); location.reload();
+    } catch { alert('Invalid file format'); }
+  };
+  r.readAsText(file);
+}
+
+function clearData() {
+  localStorage.removeItem('gradio-data'); localStorage.removeItem('gradio-planner');
+  state = {institution:'SP', semesters:[]}; plannerSems = [];
+  document.getElementById('clear-confirm').style.display='none';
+  alert('All data cleared'); location.reload();
+}
+
+// ════════════════════════════════════════════════
+//  PDF EXPORT
+// ════════════════════════════════════════════════
+function exportPDF() {
+  if (!window.jspdf) { alert('PDF library not loaded. Check your internet connection.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+
+  const allMods = state.semesters.flatMap(s=>s.modules);
+  if (!allMods.length) { alert('No data to export. Add some modules first.'); return; }
+
+  const inst = INSTITUTIONS[state.institution];
+  const gpa = calcGPA(allMods, state.institution);
+  const classification = getClassification(gpa, state.institution);
+  const totalCredits = allMods.reduce((s,m)=>s+(m.credits||0),0);
+  const date = new Date().toLocaleDateString('en-SG', {year:'numeric',month:'long',day:'numeric'});
+
+  const PW = 210, PH = 297;
+  const ML = 18, MR = 18, MT = 20;
+  const CW = PW - ML - MR;
+  let y = MT;
+
+  // ── Header bar ──
+  doc.setFillColor(99,102,241);
+  doc.rect(0, 0, PW, 36, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(22); doc.setFont('helvetica','bold');
+  doc.text('Gradio', ML, 16);
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text('Singapore GPA Report', ML, 24);
+  doc.setFontSize(9);
+  doc.text(`Generated: ${date}`, PW-MR, 24, {align:'right'});
+  y = 46;
+
+  // ── School & Summary ──
+  doc.setTextColor(30,30,46);
+  doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text(inst.name, ML, y); y += 6;
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+  doc.text(`GPA Scale: ${inst.maxGPA.toFixed(1)} max`, ML, y); y += 10;
+
+  // ── GPA summary boxes ──
+  const boxes = [
+    {label:'Cumulative GPA', val:gpa.toFixed(2), color:[99,102,241]},
+    {label:'Classification', val:classification, color:[16,185,129]},
+    {label:'Total Credits', val:totalCredits.toString(), color:[245,158,11]},
+    {label:'Semesters', val:state.semesters.length.toString(), color:[139,92,246]},
+  ];
+  const bw = (CW - 9) / 4;
+  boxes.forEach((b,i) => {
+    const bx = ML + i*(bw+3);
+    doc.setFillColor(...b.color, 0.1);
+    doc.setFillColor(240,242,255);
+    doc.roundedRect(bx, y, bw, 22, 2, 2, 'F');
+    doc.setDrawColor(...b.color); doc.setLineWidth(0.5);
+    doc.roundedRect(bx, y, bw, 22, 2, 2, 'S');
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+    doc.text(b.label.toUpperCase(), bx+bw/2, y+7, {align:'center'});
+    doc.setFontSize(b.val.length > 8 ? 8 : 13); doc.setFont('helvetica','bold');
+    doc.setTextColor(...b.color);
+    doc.text(b.val, bx+bw/2, y+17, {align:'center'});
+  });
+  y += 30;
+
+  // ── GPA progress bar ──
+  doc.setFillColor(230,232,240);
+  doc.roundedRect(ML, y, CW, 5, 2.5, 2.5, 'F');
+  const fillW = Math.min((gpa/inst.maxGPA)*CW, CW);
+  const gpaCol = gpa/inst.maxGPA >= 0.9 ? [16,185,129] : gpa/inst.maxGPA >= 0.75 ? [99,102,241] : [245,158,11];
+  doc.setFillColor(...gpaCol);
+  doc.roundedRect(ML, y, fillW, 5, 2.5, 2.5, 'F');
+  y += 10;
+
+  // ── Semester sections ──
+  state.semesters.forEach((sem, si) => {
+    if (y > PH - 60) { doc.addPage(); y = MT; }
+    const semGPA = calcGPA(sem.modules, state.institution);
+    const semCreds = sem.modules.reduce((s,m)=>s+(m.credits||0),0);
+
+    // Sem header
+    doc.setFillColor(245,247,255);
+    doc.roundedRect(ML, y, CW, 10, 2, 2, 'F');
+    doc.setDrawColor(200,205,230); doc.setLineWidth(0.3);
+    doc.roundedRect(ML, y, CW, 10, 2, 2, 'S');
+    doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,46);
+    doc.text(sem.name, ML+4, y+7);
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+    doc.text(`GPA: ${semGPA.toFixed(2)}  ·  ${semCreds} credits  ·  ${sem.modules.length} modules`, PW-MR, y+7, {align:'right'});
+    y += 14;
+
+    if (!sem.modules.length) {
+      doc.setFontSize(8); doc.setTextColor(150,160,180);
+      doc.text('No modules recorded', ML+4, y); y += 8;
+      return;
+    }
+
+    // Module table header
+    doc.setFillColor(99,102,241);
+    doc.rect(ML, y, CW, 7, 'F');
+    doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    doc.text('MODULE', ML+3, y+5);
+    doc.text('CREDITS', ML+CW*0.62, y+5, {align:'center'});
+    doc.text('GRADE', ML+CW*0.78, y+5, {align:'center'});
+    doc.text('GRADE POINTS', ML+CW, y+5, {align:'right'});
+    y += 7;
+
+    // Module rows
+    sem.modules.forEach((m,mi) => {
+      if (y > PH - 30) { doc.addPage(); y = MT; }
+      const pts = getPoints(m.grade, state.institution);
+      const rowBg = mi % 2 === 0 ? [252,252,255] : [245,247,255];
+      doc.setFillColor(...rowBg);
+      doc.rect(ML, y, CW, 8, 'F');
+      doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(30,30,46);
+      const modName = m.name || '(Unnamed module)';
+      doc.text(modName.length > 40 ? modName.slice(0,39)+'…' : modName, ML+3, y+5.5);
+      doc.text((m.credits||0).toString(), ML+CW*0.62, y+5.5, {align:'center'});
+      doc.setFont('helvetica','bold');
+      doc.text(m.grade || '—', ML+CW*0.78, y+5.5, {align:'center'});
+      doc.setFont('helvetica','normal'); doc.setTextColor(99,102,241);
+      doc.text(m.grade ? (pts * (m.credits||0)).toFixed(1) : '—', ML+CW, y+5.5, {align:'right'});
+      doc.setTextColor(30,30,46);
+      y += 8;
+    });
+
+    // Sem subtotal
+    doc.setFillColor(230,232,255);
+    doc.rect(ML, y, CW, 8, 'F');
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(99,102,241);
+    doc.text(`Semester GPA: ${semGPA.toFixed(2)}`, ML+3, y+5.5);
+    doc.text(`${semCreds} credits total`, ML+CW, y+5.5, {align:'right'});
+    y += 14;
+  });
+
+  // ── Final summary ──
+  if (y > PH - 40) { doc.addPage(); y = MT; }
+  doc.setFillColor(99,102,241);
+  doc.roundedRect(ML, y, CW, 20, 3, 3, 'F');
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text(`Final Cumulative GPA: ${gpa.toFixed(2)} / ${inst.maxGPA.toFixed(1)}`, ML+CW/2, y+8, {align:'center'});
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text(`${classification}  ·  ${totalCredits} credits completed  ·  ${state.semesters.length} semester(s)`, ML+CW/2, y+16, {align:'center'});
+  y += 28;
+
+  // ── Footer ──
+  const pageCount = doc.getNumberOfPages();
+  for (let pg=1; pg<=pageCount; pg++) {
+    doc.setPage(pg);
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(150,160,180);
+    doc.text('Gradio · Singapore GPA Calculator · gradio.vercel.app', ML, PH-8);
+    doc.text(`Page ${pg} of ${pageCount}`, PW-MR, PH-8, {align:'right'});
+    doc.setDrawColor(210,215,230); doc.setLineWidth(0.3);
+    doc.line(ML, PH-12, PW-MR, PH-12);
+  }
+
+  const filename = `Gradio-GPA-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(filename);
+}
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+loadState();
+initTheme();
+// Institution dropdown on settings page
+document.getElementById('inst-list').style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.5rem;grid-column:1/-1';
 </script>
 </body>
 </html>

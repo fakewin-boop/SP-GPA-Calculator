@@ -1905,7 +1905,7 @@ function submitFeedback() {
   const message = document.getElementById('fb-message')?.value?.trim();
   if (!message) { alert('Please write a message before sending.'); return; }
 
-  emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+  emailjs.send('service_fa090nl', 'template_f4cf58q', {
     name: name,          // matches {{name}} in template
     email: email,        // matches {{email}} in template
     subject: subject,    // matches {{subject}} in template

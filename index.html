@@ -459,12 +459,8 @@ html.dark .formula-card{background:rgba(96,121,245,0.1);border-color:rgba(96,121
     <p class="cta-sub">Join students across Singapore who use Gradio to plan smarter and aim higher.</p>
     <button class="btn-cta-white" onclick="nav('dashboard')">Start for free →</button>
   </div>
-
   <div style="border-top:1px solid var(--border)">
-    <div class="landing-footer">
-      <div class="nav-logo">
-         <img src="Gradio_Logo.png" alt="Gradio" style="width:1.8rem;height:1.8rem;object-fit:contain">
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M3 14L7 9L11 12L17 5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 5H17V8" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+   <img src="Gradio_Logo.png" alt="Gradio" style="width:1.7rem;height:1.7rem;object-fit:contain">
         <span>Gradio</span>
       </div>
       <p class="footer-note">Made with care for Singapore students — all data stays on your device.</p>
@@ -485,11 +481,7 @@ html.dark .formula-card{background:rgba(96,121,245,0.1);border-color:rgba(96,121
         <div style="width:1.8rem;height:1.8rem;flex-shrink:0;display:flex;align-items:center;justify-content:center">
           <img src="Gradio Logo.png" alt="Gradio" style="width:1.8rem;height:1.8rem;object-fit:contain">
         </div>
-        <span class="sidebar-logo-text">Gradio</span>
-      </div>
-      <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
+     <img src="Gradio_Logo.png" alt="Gradio" style="width:1.8rem;height:1.8rem;object-fit:contain">
     </div>
     <nav class="sidebar-nav">
       <div class="sidebar-section-label">Main</div>
@@ -1928,16 +1920,19 @@ function submitFeedback() {
   if (!message) { alert('Please write a message before sending.'); return; }
 
   emailjs.send('service_fa090nl', 'template_f4cf58q', {
-    name: name,          // matches {{name}} in template
-    email: email,        // matches {{email}} in template
-    subject: subject,    // matches {{subject}} in template
-    message: message     // matches {{message}} in template
+    name: name,
+    email: email,
+    subject: subject,
+    message: message
   })
-.then(() => {
-  document.getElementById('feedback-form-view').style.display = 'none';
-  document.getElementById('feedback-success-view').style.display = 'block';
-})
+  .then(() => {
+    document.getElementById('feedback-form-view').style.display = 'none';
+    document.getElementById('feedback-success-view').style.display = 'block';
   })
+  .catch(err => {
+    alert('Failed to send: ' + (err?.text || JSON.stringify(err)));
+  });
+}
   .catch(err => {
     alert('Failed to send: ' + (err?.text || JSON.stringify(err)));
   });

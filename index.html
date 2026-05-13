@@ -1933,10 +1933,6 @@ function submitFeedback() {
     alert('Failed to send: ' + (err?.text || JSON.stringify(err)));
   });
 }
-  .catch(err => {
-    alert('Failed to send: ' + (err?.text || JSON.stringify(err)));
-  });
-}
 function resetFeedback() {
   document.getElementById('fb-name').value='';
   document.getElementById('fb-email').value='';

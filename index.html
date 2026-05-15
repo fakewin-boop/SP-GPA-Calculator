@@ -561,18 +561,7 @@ html.dark .formula-card{background:rgba(96,121,245,0.1);border-color:rgba(96,121
     </div>
 
     <!-- ═══ DASHBOARD ═══ -->
-    <div class="app-page active" id="dashboard-page">
-      <div class="page-header">
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-sub" id="dash-school-name">Select your institution in the Calculator to begin</p>
-      </div>
-      <div id="dash-empty" class="empty-state card">
-        <div class="empty-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg></div>
-        <h2>Welcome to Gradio</h2>
-        <p class="text-muted" style="font-size:.83rem;margin-bottom:1.4rem;max-width:30ch;margin-left:auto;margin-right:auto">Head to the Calculator to add your modules and start tracking your GPA.</p>
-        <button class="btn btn-primary" onclick="nav('calculator')">Go to Calculator</button>
-      </div>
-      <div id="dash-content" style="display:none">
+      <div id="dash-content"
         <div class="grid-4" style="margin-bottom:1.25rem">
           <div class="stat-card card"><div class="stat-label">Cumulative GPA</div><div class="stat-val" id="dash-gpa">0.00</div><div class="stat-sub" id="dash-class">—</div></div>
           <div class="stat-card card"><div class="stat-label">Modules</div><div class="stat-val" id="dash-mods">0</div><div class="stat-sub" id="dash-credits">0 Credits</div></div>

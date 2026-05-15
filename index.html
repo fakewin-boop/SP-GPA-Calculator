@@ -1074,11 +1074,21 @@ function updateSemTabs() {
   const tabs = document.getElementById('sem-tabs');
   if (!d.semesters.length) { tabs.innerHTML = ''; return; }
   tabs.innerHTML = d.semesters.map((s,i) =>
-    `<button class="sem-tab ${i===activeSemIdx?'active':''}" onclick="switchSem(${i})">${s.name}${d.semesters.length>1?`<span class="sem-tab-del" onclick="event.stopPropagation();deleteSem(${i})">✕</span>`:''}</button>`
+    `<button class="sem-tab ${i===activeSemIdx?'active':''}" draggable="true"
+      onclick="switchSem(${i})"
+      ondragstart="event.dataTransfer.setData('text/plain','${i}');event.currentTarget.style.opacity='0.5'"
+      ondragend="event.currentTarget.style.opacity='1'"
+      ondragover="event.preventDefault()"
+      ondrop="event.preventDefault();reorderSem(parseInt(event.dataTransfer.getData('text/plain')),${i})"
+    >${s.name}${d.semesters.length>1?`<span class="sem-tab-del" onclick="event.stopPropagation();deleteSem(${i})">✕</span>`:''}</button>`
   ).join('');
 }
 function switchSem(i) { activeSemIdx = i; updateSemTabs(); updateModulesPanel(); }
 
+function renameSems() {
+  state.semesters.forEach((s,i) => { s.name = `Semester ${i+1}`; });
+  if (simState) simState.semesters.forEach((s,i) => { s.name = `Semester ${i+1}`; });
+}
 function addSem() {
   const n = state.semesters.length + 1;
   const newSem = {id:Date.now().toString(), name:`Semester ${n}`, modules:[]};
@@ -1092,11 +1102,25 @@ function deleteSem(i) {
   if (state.semesters.length <= 1) return;
   state.semesters.splice(i,1);
   if (simState) simState.semesters.splice(i,1);
+  renameSems();
   activeSemIdx = Math.min(activeSemIdx, state.semesters.length-1);
   saveState(); updateSemTabs(); updateModulesPanel(); updateGPACircle();
   if (currentPage === 'dashboard') renderDashboard();
 }
 function deleteActiveSem() { deleteSem(activeSemIdx); }
+function reorderSem(from, to) {
+  if (from === to) return;
+  const [sem] = state.semesters.splice(from, 1);
+  state.semesters.splice(to, 0, sem);
+  if (simState) {
+    const [ss] = simState.semesters.splice(from, 1);
+    simState.semesters.splice(to, 0, ss);
+  }
+  renameSems();
+  activeSemIdx = to;
+  saveState(); updateSemTabs(); updateModulesPanel(); updateGPACircle();
+  if (currentPage === 'dashboard') renderDashboard();
+}
 
 function updateModulesPanel() {
   const d = currentData();
@@ -1362,7 +1386,7 @@ function renderDashboard() {
   document.getElementById('dash-credits').textContent = allMods.reduce((s,m)=>s+(m.credits||0),0)+' Credits';
   document.getElementById('dash-sems').textContent = state.semesters.length;
   document.getElementById('dash-pct').textContent = max > 0 ? Math.round((gpa/max)*100)+'%' : '0%';
-  const trendData = state.semesters.map(s=>({name:s.name, gpa:calcGPA(s.modules, state.institution)}));
+  const trendData = state.semesters.map((s,i)=>({name:`Sem ${i+1}`, gpa:calcGPA(s.modules, state.institution)}));
   const emptyTrend = document.getElementById('trend-empty');
   const canvas = document.getElementById('trend-chart');
   if (!trendData.length) { emptyTrend.style.display='block'; canvas.style.display='none'; }
@@ -1403,7 +1427,7 @@ function drawLineChart(canvas, data, maxVal) {
   if (data.length === 1) {
     const x = pad.l+w/2, y = pad.t+h-(data[0].gpa/maxVal)*h;
     ctx.fillStyle = lineColor; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = textColor; ctx.textAlign='center'; ctx.fillText(data[0].name, x, pad.t+h+18); return;
+    ctx.fillStyle = textColor; ctx.textAlign = 'center'; ctx.fillText(data[0].name, x, pad.t+h+18); return;
   }
   const step = w/(data.length-1);
   // Gradient fill
@@ -1424,7 +1448,7 @@ function drawLineChart(canvas, data, maxVal) {
     ctx.fillStyle=lineColor; ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
     ctx.fillStyle=isDark?'#181720':'#fff'; ctx.beginPath(); ctx.arc(x,y,1.5,0,Math.PI*2); ctx.fill();
     ctx.fillStyle=textColor; ctx.textAlign='center'; ctx.font='10px Plus Jakarta Sans,system-ui,sans-serif';
-    ctx.fillText(d.name.length>8?d.name.slice(0,7)+'…':d.name, x, pad.t+h+18);
+    ctx.fillText(d.name, x, pad.t+h+18);
   });
 }
 

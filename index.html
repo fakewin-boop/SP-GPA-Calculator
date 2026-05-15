@@ -152,14 +152,16 @@ textarea{resize:vertical;min-height:100px;}
 /* Main content */
 .main-content {
   margin-left: var(--sidebar-w);
+  width: calc(100% - var(--sidebar-w));
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  transition: margin-left .25s cubic-bezier(.4,0,.2,1);
+  transition: margin-left .25s cubic-bezier(.4,0,.2,1), width .25s cubic-bezier(.4,0,.2,1);
 }
 
 .main-content.sidebar-collapsed {
   margin-left: var(--sidebar-collapsed);
+  width: calc(100% - var(--sidebar-collapsed));
 }
 
 /* Pages */
@@ -1084,6 +1086,7 @@ function addSem() {
   if (simState) simState.semesters.push({...newSem, modules:[]});
   activeSemIdx = state.semesters.length - 1;
   saveState(); updateSemTabs(); updateModulesPanel(); updateGPACircle();
+  if (currentPage === 'dashboard') renderDashboard();
 }
 function deleteSem(i) {
   if (state.semesters.length <= 1) return;
@@ -1091,6 +1094,7 @@ function deleteSem(i) {
   if (simState) simState.semesters.splice(i,1);
   activeSemIdx = Math.min(activeSemIdx, state.semesters.length-1);
   saveState(); updateSemTabs(); updateModulesPanel(); updateGPACircle();
+  if (currentPage === 'dashboard') renderDashboard();
 }
 function deleteActiveSem() { deleteSem(activeSemIdx); }
 

@@ -163,15 +163,8 @@ textarea{resize:vertical;min-height:100px;}
   width: calc(100% - var(--sidebar-collapsed)); /* add this */
 }
 
-/* Topbar */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:.78rem 2rem;border-bottom:1px solid var(--border);background:var(--bg-card);position:sticky;top:0;z-index:100;}
-.topbar-left{display:flex;align-items:center;gap:.75rem;}
-.topbar-title{font-size:.95rem;font-weight:700;}
-.topbar-right{display:flex;align-items:center;gap:.5rem;}
-.mobile-menu-btn{display:none;padding:.38rem;border-radius:var(--radius-sm);border:1px solid var(--border-mid);background:var(--bg-card);cursor:pointer;color:var(--fg-muted);}
-
 /* Pages */
-.app-page{display:none;padding:1.5rem 1.75rem;min-height:calc(100vh - 3.6rem);}
+.app-page{display:none;padding:1.75rem 2rem;min-height:100vh;}
 .app-page.active{display:block;}
 .page-header{margin-bottom:1.25rem;}
 .page-title{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.15rem;}
@@ -304,7 +297,7 @@ html.dark .formula-card{background:rgba(96,121,245,0.1);border-color:rgba(96,121
   .planner-grid{grid-template-columns:1fr;}
   .feedback-category-grid{grid-template-columns:1fr 1fr;}
   .app-page{padding:1.25rem;}
-  .topbar{padding:.75rem 1.25rem;}
+
 }
 </style>
 </head>
@@ -370,20 +363,6 @@ html.dark .formula-card{background:rgba(96,121,245,0.1);border-color:rgba(96,121
   </aside>
 
   <main class="main-content" id="main-content">
-    <div class="topbar">
-      <div class="topbar-left">
-        <button class="mobile-menu-btn" onclick="openMobileSidebar()">
-          <svg class="icon-sm" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <span class="topbar-title" id="topbar-title">Dashboard</span>
-      </div>
-      <div class="topbar-right">
-        <button class="theme-btn" onclick="toggleTheme()">
-          <svg class="icon-sm" id="app-theme-icon2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-      </div>
-    </div>
-
     <!-- ═══ DASHBOARD ═══ -->
       <div class="app-page active" id="dashboard-page">
       <div class="page-header">
@@ -436,7 +415,7 @@ html.dark .formula-card{background:rgba(96,121,245,0.1);border-color:rgba(96,121
 
     <!-- ═══ CALCULATOR ═══ -->
     <div class="app-page" id="calculator-page">
-      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.9rem;margin-bottom:1.5rem">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.9rem;margin-bottom:1.25rem">
         <div class="page-header" style="margin:0"><h1 class="page-title">GPA Calculator</h1><p class="page-sub">Track your academic performance, semester by semester</p></div>
         <div style="display:flex;gap:.65rem;flex-wrap:wrap;align-items:center">
           <select id="inst-select" onchange="changeInstitution()" style="min-width:210px"></select>
@@ -1033,8 +1012,6 @@ function nav(page) {
   const pg = document.getElementById(page + '-page');
   if (pg) pg.classList.add('active');
   document.querySelectorAll('.sidebar-link[data-page]').forEach(el => el.classList.toggle('active', el.dataset.page === page));
-  const titles = {dashboard:'Dashboard',calculator:'GPA Calculator',projection:'Academic Projection',export:'Export & Backup',feedback:'Contact & Feedback',privacy:'Privacy Policy',about:'About Gradio'};
-  document.getElementById('topbar-title').textContent = titles[page] || '';
   currentPage = page; closeMobileSidebar();
   if (page === 'dashboard') renderDashboard();
   if (page === 'calculator') renderCalculator();

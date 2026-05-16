@@ -9,32 +9,36 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300;1,9..144,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('SGE0UAQ-3hjcUY4uh');</script>
 <style>
 :root {
-  /* Light mode — clean blue-tinted white */
-  --bg:#f0f3ff;--bg-card:#ffffff;--bg-surface:#e8edfc;--bg-hover:#dce3f9;
-  --fg:#0b1020;--fg-muted:#3a4470;--fg-subtle:#7b86b8;
-  --border:rgba(79,125,255,0.13);--border-mid:rgba(79,125,255,0.22);
-  --primary:#4F7DFF;--primary-dark:#3a65e8;--primary-soft:rgba(79,125,255,0.12);
-  --primary-glow:rgba(79,125,255,0.32);
-  --secondary:#1EA7FF;--secondary-soft:rgba(30,167,255,0.12);
+  /* Light mode — clean & professional */
+  --bg:#F5F7FC;--bg-card:#FFFFFF;--bg-surface:#EDEFF5;--bg-hover:#e2e6f0;
+  --fg:#111827;--fg-muted:#6B7280;--fg-subtle:#9ca3af;
+  --border:rgba(41,121,255,0.13);--border-mid:rgba(41,121,255,0.22);
+  --primary:#2979FF;--primary-dark:#1a5ee8;--primary-soft:rgba(41,121,255,0.10);
+  --primary-glow:rgba(41,121,255,0.28);
+  --secondary:#6A7BFF;--secondary-soft:rgba(106,123,255,0.12);
+  --hover-accent:#4D94FF;
   --success:#0a9967;--success-soft:rgba(10,153,103,0.1);
   --warning:#b96a00;--warning-soft:rgba(185,106,0,0.1);
   --danger:#c42b35;--danger-soft:rgba(196,43,53,0.1);
   --sidebar-w:232px;--sidebar-collapsed:58px;
   --radius-xs:5px;--radius-sm:8px;--radius:12px;--radius-lg:16px;
-  --shadow-sm:0 1px 4px rgba(79,125,255,0.1),0 1px 2px rgba(0,0,0,0.04);
-  --shadow:0 4px 24px rgba(79,125,255,0.13),0 1px 4px rgba(0,0,0,0.05);
-  --shadow-lg:0 12px 48px rgba(79,125,255,0.18),0 4px 16px rgba(0,0,0,0.07);
+  --shadow-sm:0 1px 4px rgba(41,121,255,0.10),0 1px 2px rgba(0,0,0,0.04);
+  --shadow:0 4px 24px rgba(41,121,255,0.13),0 1px 4px rgba(0,0,0,0.05);
+  --shadow-lg:0 12px 48px rgba(41,121,255,0.18),0 4px 16px rgba(0,0,0,0.07);
 }
 html.dark {
-  /* Dark mode — deep navy AI platform */
-  --bg:#0B1020;--bg-card:#121933;--bg-surface:#1A2447;--bg-hover:#1f2c56;
-  --fg:#F5F7FF;--fg-muted:#A9B4D0;--fg-subtle:#4a5580;
-  --border:rgba(79,125,255,0.14);--border-mid:rgba(79,125,255,0.26);
-  --primary:#4F7DFF;--primary-dark:#6b93ff;--primary-soft:rgba(79,125,255,0.18);
-  --primary-glow:rgba(79,125,255,0.35);
-  --secondary:#1EA7FF;--secondary-soft:rgba(30,167,255,0.15);
+  /* Dark mode — primary modern look */
+  --bg:#0B1020;--bg-card:rgba(255,255,255,0.06);--bg-surface:#151B2F;--bg-hover:#1c2540;
+  --fg:#F5F7FF;--fg-muted:#9CA8C3;--fg-subtle:#5a6480;
+  --border:rgba(30,144,255,0.14);--border-mid:rgba(30,144,255,0.26);
+  --primary:#1E90FF;--primary-dark:#4DA3FF;--primary-soft:rgba(30,144,255,0.16);
+  --primary-glow:rgba(30,144,255,0.32);
+  --secondary:#6A7BFF;--secondary-soft:rgba(106,123,255,0.15);
+  --hover-accent:#4DA3FF;
   --success:#20c07e;--success-soft:rgba(32,192,126,0.14);
   --warning:#d49520;--warning-soft:rgba(212,149,32,0.14);
   --danger:#e05258;--danger-soft:rgba(224,82,88,0.14);
@@ -1714,11 +1718,37 @@ function selectFeedbackCat(el, cat) {
 function submitFeedback() {
   const msg = document.getElementById('fb-message').value.trim();
   if (!msg) { alert('Please enter a message.'); return; }
-  const fb = {category:feedbackCategory, name:document.getElementById('fb-name').value.trim(), email:document.getElementById('fb-email').value.trim(), message:msg, attachments:attachedScreenshots.length, date:new Date().toISOString()};
-  const all = JSON.parse(localStorage.getItem('gradio-feedback')||'[]');
-  all.push(fb); localStorage.setItem('gradio-feedback', JSON.stringify(all));
-  document.getElementById('feedback-form-view').style.display = 'none';
-  document.getElementById('feedback-success-view').style.display = 'block';
+  const name = document.getElementById('fb-name').value.trim();
+  const email = document.getElementById('fb-email').value.trim();
+  const now = new Date();
+  const timeStr = now.toLocaleString('en-SG', {dateStyle:'medium', timeStyle:'short'});
+  const catLabels = {feature:'Feature Request', bug:'Bug Report', general:'General Feedback', other:'Other'};
+  const subjectLine = `${catLabels[feedbackCategory] || 'Feedback'} — Gradio`;
+
+  const btn = document.querySelector('#feedback-form-view .btn-primary');
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…';
+
+  emailjs.send('service_fa090nl', 'template_f4cf58q', {
+    subject: subjectLine,
+    name: name || 'Anonymous',
+    from_email: email || 'Not provided',
+    email: email || 'noreply@gradio.app',
+    message: msg,
+    time: timeStr,
+  }).then(() => {
+    const fb = {category:feedbackCategory, name, email, message:msg, attachments:attachedScreenshots.length, date:now.toISOString()};
+    const all = JSON.parse(localStorage.getItem('gradio-feedback')||'[]');
+    all.push(fb); localStorage.setItem('gradio-feedback', JSON.stringify(all));
+    document.getElementById('feedback-form-view').style.display = 'none';
+    document.getElementById('feedback-success-view').style.display = 'block';
+  }).catch((err) => {
+    console.error('EmailJS error:', err);
+    alert('Failed to send message. Please try again or email us directly.');
+  }).finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Message';
+  });
 }
 function resetFeedback() {
   document.getElementById('fb-name').value='';

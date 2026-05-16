@@ -306,8 +306,8 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
   #calc-layout{grid-template-columns:1fr!important;}
   .sticky-panel{position:static;}
   .content-page-wrap{grid-template-columns:1fr;}
-  .main-content{margin-left:0!important;padding-top:3.2rem;}
-  .sidebar{transform:translateX(-100%);z-index:180;}
+  .main-content{margin-left:0!important;width:100%!important;padding-top:3.2rem;}
+  .sidebar{transform:translateX(-100%);z-index:180;width:var(--sidebar-w)!important;}
   .sidebar.mobile-open{transform:translateX(0);}
   .sidebar.collapsed{transform:translateX(-100%);}
   .sidebar.mobile-open.collapsed{transform:translateX(0);}
@@ -660,8 +660,14 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
       <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.9rem;margin-bottom:1.5rem">
         <div class="page-header" style="margin:0"><h1 class="page-title">Academic Projection</h1><p class="page-sub">Forecast your GPA, plan recovery, and model future semesters</p></div>
         <div style="display:flex;gap:.65rem;flex-wrap:wrap">
-          <button class="btn btn-ghost" onclick="exportProjectionPDF()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export PDF</button>
-          <button class="btn btn-ghost" onclick="exportProjectionJSON()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export JSON</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('proj-json-input').click()">
+            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Import JSON
+            <input type="file" id="proj-json-input" accept="application/json,.json" style="display:none" onchange="importJSON(event)">
+          </button>
+          <button class="btn btn-ghost" onclick="document.getElementById('proj-pdf-input').click()">
+            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Import PDF
+            <input type="file" id="proj-pdf-input" accept="application/pdf,.pdf" style="display:none" onchange="importPDF(event)">
+          </button>
           <button class="btn btn-primary" onclick="plannerAddSem()"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Semester Plan</button>
         </div>
       </div>
@@ -736,23 +742,76 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
       <div class="page-header"><h1 class="page-title">Export & Backup</h1><p class="page-sub">Download your GPA data in multiple formats, or restore from a backup</p></div>
       <div class="grid-2" style="align-items:start">
         <div class="space-y">
+
+          <!-- Export PDF -->
           <div class="card">
-            <div class="section-hdr">GPA Calculator Data</div>
+            <div class="section-hdr">Export PDF Report</div>
+            <p class="text-muted" style="font-size:.77rem;margin-bottom:1rem">Choose which data to export as a formatted PDF report.</p>
             <div class="space-y">
-              <div>
-                <div class="font-semibold" style="margin-bottom:.3rem;font-size:.87rem">Export PDF Report</div>
-                <p class="text-muted" style="font-size:.77rem;margin-bottom:.7rem">A clean, formatted PDF with your complete GPA history, semester breakdowns, and classification.</p>
-                <button class="btn btn-primary btn-full" onclick="exportPDF()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export PDF Report</button>
+              <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;cursor:pointer;background:var(--bg-surface)" onclick="toggleExportPanel('pdf-calc')">
+                  <div style="display:flex;align-items:center;gap:.65rem">
+                    <div style="width:1.8rem;height:1.8rem;border-radius:var(--radius-xs);background:var(--primary-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="icon-xs" style="color:var(--primary)" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg></div>
+                    <span style="font-size:.85rem;font-weight:600">GPA Calculator</span>
+                  </div>
+                  <svg id="pdf-calc-chevron" class="icon-sm" style="transition:transform .2s" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div id="pdf-calc-panel" style="display:none;padding:.9rem 1rem;border-top:1px solid var(--border)">
+                  <p class="text-muted" style="font-size:.75rem;margin-bottom:.75rem">Full GPA history with semester breakdowns, module list, and classification.</p>
+                  <button class="btn btn-primary btn-full" onclick="exportPDF()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export GPA Calculator PDF</button>
+                </div>
               </div>
-              <div class="divider"></div>
-              <div>
-                <div class="font-semibold" style="margin-bottom:.3rem;font-size:.87rem">Export JSON Backup</div>
-                <p class="text-muted" style="font-size:.77rem;margin-bottom:.7rem">Save a complete backup of all your data — calculator, projections, and custom schools.</p>
-                <button class="btn btn-ghost btn-full" onclick="exportJSON()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export JSON Backup</button>
+              <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;cursor:pointer;background:var(--bg-surface)" onclick="toggleExportPanel('pdf-proj')">
+                  <div style="display:flex;align-items:center;gap:.65rem">
+                    <div style="width:1.8rem;height:1.8rem;border-radius:var(--radius-xs);background:var(--success-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="icon-xs" style="color:var(--success)" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+                    <span style="font-size:.85rem;font-weight:600">Academic Projection</span>
+                  </div>
+                  <svg id="pdf-proj-chevron" class="icon-sm" style="transition:transform .2s" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div id="pdf-proj-panel" style="display:none;padding:.9rem 1rem;border-top:1px solid var(--border)">
+                  <p class="text-muted" style="font-size:.75rem;margin-bottom:.75rem">Semester plans, workload overview, and GPA projection analysis.</p>
+                  <button class="btn btn-success btn-full" onclick="exportProjectionPDF()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export Projection PDF</button>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- Export JSON -->
+          <div class="card">
+            <div class="section-hdr">Export JSON Backup</div>
+            <p class="text-muted" style="font-size:.77rem;margin-bottom:1rem">Choose which data to back up as a JSON file.</p>
+            <div class="space-y">
+              <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;cursor:pointer;background:var(--bg-surface)" onclick="toggleExportPanel('json-calc')">
+                  <div style="display:flex;align-items:center;gap:.65rem">
+                    <div style="width:1.8rem;height:1.8rem;border-radius:var(--radius-xs);background:var(--primary-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="icon-xs" style="color:var(--primary)" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg></div>
+                    <span style="font-size:.85rem;font-weight:600">GPA Calculator</span>
+                  </div>
+                  <svg id="json-calc-chevron" class="icon-sm" style="transition:transform .2s" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div id="json-calc-panel" style="display:none;padding:.9rem 1rem;border-top:1px solid var(--border)">
+                  <p class="text-muted" style="font-size:.75rem;margin-bottom:.75rem">Exports calculator semesters, modules, grades, and custom schools.</p>
+                  <button class="btn btn-ghost btn-full" onclick="exportCalcJSON()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export Calculator JSON</button>
+                </div>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;cursor:pointer;background:var(--bg-surface)" onclick="toggleExportPanel('json-proj')">
+                  <div style="display:flex;align-items:center;gap:.65rem">
+                    <div style="width:1.8rem;height:1.8rem;border-radius:var(--radius-xs);background:var(--success-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg class="icon-xs" style="color:var(--success)" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+                    <span style="font-size:.85rem;font-weight:600">Academic Projection</span>
+                  </div>
+                  <svg id="json-proj-chevron" class="icon-sm" style="transition:transform .2s" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div id="json-proj-panel" style="display:none;padding:.9rem 1rem;border-top:1px solid var(--border)">
+                  <p class="text-muted" style="font-size:.75rem;margin-bottom:.75rem">Exports semester plans, module workload, and projection settings.</p>
+                  <button class="btn btn-ghost btn-full" onclick="exportProjectionJSON()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export Projection JSON</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Import & Restore -->
           <div class="card">
             <div class="section-hdr">Import & Restore</div>
             <div class="space-y">
@@ -1808,6 +1867,20 @@ function resetFeedback() {
 }
 
 // ── Data management ──
+function toggleExportPanel(id) {
+  const panel = document.getElementById(id + '-panel');
+  const chevron = document.getElementById(id + '-chevron');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+function exportCalcJSON() {
+  const data = {calculator:state, customSchools:JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}'), exportedAt:new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`gradio-calculator-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
 function exportJSON() {
   const data = {calculator:state, planner:plannerSems, customSchools:JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}'), exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});

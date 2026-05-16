@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300;1,9..144,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init('SGE0UAQ-3hjcUY4uh');</script>
+<script>emailjs.init('YOUR_PUBLIC_KEY');</script>
 <style>
 :root {
   /* Light mode — clean & professional */
@@ -935,11 +935,11 @@ html.dark .formula-card{background:rgba(96,121,245,0.1);border-color:rgba(96,121
 ════════════════════════════════════ -->
 <script>
 const BUILT_IN_INSTITUTIONS = {
-  SP:  {name:'Singapore Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
-  NP:  {name:'Ngee Ann Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
-  TP:  {name:'Temasek Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
-  NYP: {name:'Nanyang Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
-  RP:  {name:'Republic Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
+  SP:  {name:'Singapore Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'DIST',p:4.0,l:'Distinction (Top 5%)',isDistinction:true},{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
+  NP:  {name:'Ngee Ann Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'AD',p:4.0,l:'Advanced Distinction (Top 5%)',isDistinction:true},{g:'DIST',p:4.0,l:'Distinction',isDistinction:true},{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
+  TP:  {name:'Temasek Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'Z',p:4.0,l:'Grade Z – Distinction (Top 5%)',isDistinction:true},{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
+  NYP: {name:'Nanyang Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'DIST',p:4.0,l:'Distinction (Top 5%)',isDistinction:true},{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
+  RP:  {name:'Republic Polytechnic',maxGPA:4.0,displayCap:4.0,grades:[{g:'Dist',p:4.0,l:'Distinction (Top 5%)',isDistinction:true},{g:'A',p:4.0,l:'A (80–100)'},{g:'B+',p:3.5,l:'B+ (75–79)'},{g:'B',p:3.0,l:'B (70–74)'},{g:'C+',p:2.5,l:'C+ (65–69)'},{g:'C',p:2.0,l:'C (60–64)'},{g:'D+',p:1.5,l:'D+ (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
   NUS: {name:'National University of Singapore',maxGPA:5.0,displayCap:5.0,grades:[{g:'A+',p:5.0,l:'A+ (90–100)'},{g:'A',p:5.0,l:'A (85–89)'},{g:'A-',p:4.5,l:'A- (80–84)'},{g:'B+',p:4.0,l:'B+ (75–79)'},{g:'B',p:3.5,l:'B (70–74)'},{g:'B-',p:3.0,l:'B- (65–69)'},{g:'C+',p:2.5,l:'C+ (60–64)'},{g:'C',p:2.0,l:'C (55–59)'},{g:'D+',p:1.5,l:'D+ (50–54)'},{g:'D',p:1.0,l:'D (45–49)'},{g:'F',p:0.0,l:'F (0–44)'}]},
   NTU: {name:'Nanyang Technological University',maxGPA:5.0,displayCap:5.0,grades:[{g:'A+',p:5.0,l:'A+ (90–100)'},{g:'A',p:5.0,l:'A (85–89)'},{g:'A-',p:4.5,l:'A- (80–84)'},{g:'B+',p:4.0,l:'B+ (75–79)'},{g:'B',p:3.5,l:'B (70–74)'},{g:'B-',p:3.0,l:'B- (65–69)'},{g:'C+',p:2.5,l:'C+ (60–64)'},{g:'C',p:2.0,l:'C (55–59)'},{g:'D+',p:1.5,l:'D+ (50–54)'},{g:'D',p:1.0,l:'D (45–49)'},{g:'F',p:0.0,l:'F (0–44)'}]},
   // SMU: A+ = 4.3 grade points internally, but displayed CGPA caps at 4.0
@@ -948,7 +948,7 @@ const BUILT_IN_INSTITUTIONS = {
   SUTD:{name:'Singapore University of Technology & Design',maxGPA:5.0,displayCap:5.0,internalMax:5.3,grades:[{g:'A+',p:5.3,l:'A+ (90–100)'},{g:'A',p:5.0,l:'A (85–89)'},{g:'A-',p:4.5,l:'A- (80–84)'},{g:'B+',p:4.0,l:'B+ (75–79)'},{g:'B',p:3.5,l:'B (70–74)'},{g:'B-',p:3.0,l:'B- (65–69)'},{g:'C+',p:2.5,l:'C+ (60–64)'},{g:'C',p:2.0,l:'C (55–59)'},{g:'D',p:1.0,l:'D (50–54)'},{g:'F',p:0.0,l:'F (0–49)'}]},
   SIT: {name:'Singapore Institute of Technology',maxGPA:5.0,displayCap:5.0,grades:[{g:'A+',p:5.0,l:'A+ (90–100)'},{g:'A',p:5.0,l:'A (85–89)'},{g:'A-',p:4.5,l:'A- (80–84)'},{g:'B+',p:4.0,l:'B+ (75–79)'},{g:'B',p:3.5,l:'B (70–74)'},{g:'B-',p:3.0,l:'B- (65–69)'},{g:'C+',p:2.5,l:'C+ (60–64)'},{g:'C',p:2.0,l:'C (55–59)'},{g:'D+',p:1.5,l:'D+ (50–54)'},{g:'D',p:1.0,l:'D (45–49)'},{g:'F',p:0.0,l:'F (0–44)'}]},
   SUSS:{name:'Singapore University of Social Sciences',maxGPA:5.0,displayCap:5.0,grades:[{g:'A+',p:5.0,l:'A+ (90–100)'},{g:'A',p:5.0,l:'A (85–89)'},{g:'A-',p:4.5,l:'A- (80–84)'},{g:'B+',p:4.0,l:'B+ (75–79)'},{g:'B',p:3.5,l:'B (70–74)'},{g:'B-',p:3.0,l:'B- (65–69)'},{g:'C+',p:2.5,l:'C+ (60–64)'},{g:'C',p:2.0,l:'C (55–59)'},{g:'D+',p:1.5,l:'D+ (50–54)'},{g:'D',p:1.0,l:'D (45–49)'},{g:'F',p:0.0,l:'F (0–44)'}]},
-  ITE: {name:'Institute of Technical Education',maxGPA:4.0,displayCap:4.0,grades:[{g:'A',p:4.0,l:'A (80–100)'},{g:'B',p:3.0,l:'B (70–79)'},{g:'C',p:2.0,l:'C (60–69)'},{g:'D',p:1.0,l:'D (50–59)'},{g:'F',p:0.0,l:'F (0–49)'}]},
+  ITE: {name:'Institute of Technical Education',maxGPA:4.0,displayCap:4.0,grades:[{g:'DIST',p:4.0,l:'Distinction (Top 5%)',isDistinction:true},{g:'A',p:4.0,l:'A (80–100)'},{g:'B',p:3.0,l:'B (70–79)'},{g:'C',p:2.0,l:'C (60–69)'},{g:'D',p:1.0,l:'D (50–59)'},{g:'F',p:0.0,l:'F (0–49)'}]},
 };
 
 let INSTITUTIONS = {...BUILT_IN_INSTITUTIONS};
@@ -1073,7 +1073,7 @@ function renderCalculator() {
   const inst = INSTITUTIONS[d.institution];
   const sel = document.getElementById('inst-select');
   sel.innerHTML = Object.entries(INSTITUTIONS).map(([k,v]) => `<option value="${k}" ${k===d.institution?'selected':''}>${v.name}</option>`).join('');
-  document.getElementById('grade-ref').innerHTML = inst.grades.map(g => `<span class="grade-pill">${g.g} <span class="text-primary">${g.p}</span></span>`).join('');
+  document.getElementById('grade-ref').innerHTML = inst.grades.map(g => `<span class="grade-pill" ${g.isDistinction ? 'style="background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary);font-weight:700"' : ''}>${g.g}${g.isDistinction ? ' ✦' : ''} <span class="${g.isDistinction ? '' : 'text-primary'}" style="${g.isDistinction ? 'color:var(--primary)' : ''}">${g.p}</span></span>`).join('');
   updateSemTabs(); updateModulesPanel(); updateGPACircle();
 }
 function changeInstitution() {
@@ -1159,7 +1159,7 @@ function updateModulesPanel() {
       <select style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.33rem .55rem;font-size:.83rem;color:var(--fg)"
         onchange="updateMod(${mi},'grade',this.value)">
         <option value="">—</option>
-        ${inst.grades.map(g=>`<option value="${g.g}" ${m.grade===g.g?'selected':''}>${g.g}</option>`).join('')}
+        ${inst.grades.map(g=>`<option value="${g.g}" ${m.grade===g.g?'selected':''}>${g.isDistinction ? '✦ ' : ''}${g.g}${g.isDistinction ? ' (Dist)' : ''}</option>`).join('')}
       </select>
       <button class="icon-btn danger" onclick="deleteMod(${mi})"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>`).join('');
@@ -1729,13 +1729,25 @@ function submitFeedback() {
   btn.disabled = true;
   btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…';
 
+  // Build screenshot info for the email body
+  const screenshotNote = attachedScreenshots.length > 0
+    ? `\n\n---\n📎 ${attachedScreenshots.length} screenshot(s) attached:\n` + attachedScreenshots.map(a => `• ${a.name}`).join('\n')
+    : '';
+
+  // Include first screenshot as base64 if present (EmailJS template variable: {{screenshot}})
+  const screenshotData = attachedScreenshots.length > 0 ? attachedScreenshots[0].data : '';
+  const screenshotName = attachedScreenshots.length > 0 ? attachedScreenshots[0].name : '';
+
   emailjs.send('service_fa090nl', 'template_f4cf58q', {
     subject: subjectLine,
     name: name || 'Anonymous',
     from_email: email || 'Not provided',
     email: email || 'noreply@gradio.app',
-    message: msg,
+    message: msg + screenshotNote,
     time: timeStr,
+    screenshot: screenshotData,
+    screenshot_name: screenshotName,
+    screenshot_count: attachedScreenshots.length.toString(),
   }).then(() => {
     const fb = {category:feedbackCategory, name, email, message:msg, attachments:attachedScreenshots.length, date:now.toISOString()};
     const all = JSON.parse(localStorage.getItem('gradio-feedback')||'[]');

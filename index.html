@@ -807,38 +807,18 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Import & Restore -->
-          <div class="card">
-            <div class="section-hdr">Import & Restore</div>
-            <div class="space-y">
-              <div>
-                <div class="font-semibold" style="margin-bottom:.3rem;font-size:.87rem">Import JSON Backup</div>
-                <p class="text-muted" style="font-size:.77rem;margin-bottom:.65rem">Restore from a previously exported backup. Works across devices.</p>
-                <div class="drop-zone" id="export-json-drop" onclick="document.getElementById('export-json-input').click()" ondragover="handleDragOver(event,'export-json-drop')" ondragleave="handleDragLeave('export-json-drop')" ondrop="handleDrop(event,'export-json')">
-                  <input type="file" id="export-json-input" accept="application/json,.json" onchange="importJSON(event)">
-                  <div class="drop-zone-icon"><svg class="icon-sm" style="color:var(--fg-muted)" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-                  <div style="font-size:.78rem;font-weight:600;margin-bottom:.15rem">Drop JSON backup here</div>
-                  <div style="font-size:.72rem;color:var(--fg-subtle)">or click to browse</div>
-                </div>
-                <div class="privacy-notice" style="margin-top:.5rem"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>All files are processed locally on-device — nothing is uploaded</div>
-              </div>
-              <div class="divider"></div>
-              <div>
-                <div class="font-semibold text-danger" style="margin-bottom:.3rem;font-size:.87rem">Clear All Data</div>
-                <p class="text-muted" style="font-size:.77rem;margin-bottom:.7rem">Permanently delete all data from this browser. This cannot be undone.</p>
-                <div id="clear-confirm" style="display:none" class="confirm-box">
-                  <div class="font-semibold text-danger" style="font-size:.85rem;margin-bottom:.3rem">Are you sure?</div>
-                  <div class="text-muted" style="font-size:.75rem">All module data, semesters, and planner entries will be permanently deleted.</div>
-                  <div class="confirm-btns">
-                    <button class="btn btn-danger" style="flex:1;font-size:.78rem" onclick="clearData()">Yes, delete everything</button>
-                    <button class="btn btn-ghost" style="flex:1;font-size:.78rem" onclick="document.getElementById('clear-confirm').style.display='none'">Cancel</button>
-                  </div>
-                </div>
-                <button class="btn btn-danger-outline btn-full" onclick="document.getElementById('clear-confirm').style.display='block'"><svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Clear All Data</button>
+            <div class="divider"></div>
+            <div class="font-semibold text-danger" style="margin-bottom:.3rem;font-size:.87rem">Clear All Data</div>
+            <p class="text-muted" style="font-size:.77rem;margin-bottom:.7rem">Permanently delete all data from this browser. This cannot be undone.</p>
+            <div id="clear-confirm" style="display:none" class="confirm-box">
+              <div class="font-semibold text-danger" style="font-size:.85rem;margin-bottom:.3rem">Are you sure?</div>
+              <div class="text-muted" style="font-size:.75rem">All module data, semesters, and planner entries will be permanently deleted.</div>
+              <div class="confirm-btns">
+                <button class="btn btn-danger" style="flex:1;font-size:.78rem" onclick="clearData()">Yes, delete everything</button>
+                <button class="btn btn-ghost" style="flex:1;font-size:.78rem" onclick="document.getElementById('clear-confirm').style.display='none'">Cancel</button>
               </div>
             </div>
+            <button class="btn btn-danger-outline btn-full" onclick="document.getElementById('clear-confirm').style.display='block'"><svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Clear All Data</button>
           </div>
         </div>
 
@@ -1781,24 +1761,54 @@ function exportProjectionPDF() {
 // ── Export ──
 function renderExport() {
   const list = document.getElementById('inst-list');
-  list.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.45rem';
-  list.innerHTML = Object.entries(INSTITUTIONS).map(([k,v])=>`
-    <div style="padding:.55rem .7rem;border-radius:var(--radius-sm);background:var(--bg-surface)">
-      <div class="font-semibold" style="font-size:.78rem">${k}</div>
-      <div class="text-muted" style="font-size:.67rem;margin-top:.08rem">${v.name}</div>
-      <div class="text-primary" style="font-size:.65rem;margin-top:.15rem;font-weight:600">Max GPA: ${v.displayCap||v.maxGPA}</div>
-    </div>`).join('');
+  list.style.cssText = '';
+  const cats = [
+    { label:'Polytechnics', keys:['SP','NP','TP','NYP','RP'] },
+    { label:'Universities', keys:['NUS','NTU','SMU','SUTD','SIT','SUSS'] },
+    { label:'ITE', keys:['ITE'] },
+  ];
+  list.innerHTML = cats.map(cat => {
+    const schools = cat.keys.filter(k => INSTITUTIONS[k]);
+    if (!schools.length) return '';
+    return `
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-subtle);margin-bottom:.45rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)">${cat.label}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">
+          ${schools.map(k => `
+            <div style="padding:.5rem .65rem;border-radius:var(--radius-sm);background:var(--bg-surface)">
+              <div class="font-semibold" style="font-size:.78rem">${k}</div>
+              <div class="text-muted" style="font-size:.66rem;margin-top:.06rem">${INSTITUTIONS[k].name}</div>
+              <div class="text-primary" style="font-size:.63rem;margin-top:.12rem;font-weight:600">Max GPA: ${INSTITUTIONS[k].displayCap||INSTITUTIONS[k].maxGPA}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
 }
 
 // ── About ──
 function renderAbout() {
   const list = document.getElementById('about-inst-list');
-  list.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-top:.75rem';
-  list.innerHTML = Object.entries(BUILT_IN_INSTITUTIONS).map(([k,v])=>`
-    <div style="padding:.55rem .7rem;border-radius:var(--radius-sm);background:var(--bg-surface)">
-      <div class="font-semibold" style="font-size:.78rem">${k}</div>
-      <div class="text-muted" style="font-size:.67rem">${v.name}</div>
-    </div>`).join('');
+  list.style.cssText = 'margin-top:.75rem';
+  const cats = [
+    { label:'Polytechnics', keys:['SP','NP','TP','NYP','RP'] },
+    { label:'Universities', keys:['NUS','NTU','SMU','SUTD','SIT','SUSS'] },
+    { label:'ITE', keys:['ITE'] },
+  ];
+  list.innerHTML = cats.map(cat => {
+    const schools = cat.keys.filter(k => BUILT_IN_INSTITUTIONS[k]);
+    if (!schools.length) return '';
+    return `
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-subtle);margin-bottom:.45rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)">${cat.label}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem">
+          ${schools.map(k => `
+            <div style="padding:.5rem .65rem;border-radius:var(--radius-sm);background:var(--bg-surface)">
+              <div class="font-semibold" style="font-size:.78rem">${k}</div>
+              <div class="text-muted" style="font-size:.66rem">${BUILT_IN_INSTITUTIONS[k].name}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
 }
 
 // ── Feedback ──

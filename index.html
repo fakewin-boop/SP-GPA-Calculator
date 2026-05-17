@@ -1807,7 +1807,20 @@ function selectFeedbackCat(el, cat) {
   el.classList.add('active');
   feedbackCategory = cat;
 }
-function submitFeedback() {
+async function uploadToCloudinary(base64DataUrl) {
+  const formData = new FormData();
+  formData.append('file', base64DataUrl);
+  formData.append('upload_preset', 'gradio_feedback');
+  const res = await fetch('https://api.cloudinary.com/v1_1/dl3wsdv8c/image/upload', {
+    method: 'POST',
+    body: formData
+  });
+  const data = await res.json();
+  if (data.secure_url) return data.secure_url;
+  throw new Error('Cloudinary upload failed: ' + (data.error?.message || 'unknown error'));
+}
+
+async function submitFeedback() {
   const msg = document.getElementById('fb-message').value.trim();
   if (!msg) { alert('Please enter a message.'); return; }
   const name = document.getElementById('fb-name').value.trim();
@@ -1817,47 +1830,55 @@ function submitFeedback() {
   const catLabels = {feature:'Feature Request', bug:'Bug Report', general:'General Feedback', other:'Other'};
   const subjectLine = `${catLabels[feedbackCategory] || 'Feedback'} — Gradio`;
 
-  const screenshotNote = attachedScreenshots.length > 0
-    ? `\n\n---\n📎 ${attachedScreenshots.length} screenshot(s) attached:\n` + attachedScreenshots.map(a => `• ${a.name}`).join('\n')
-    : '';
-
   const btn = document.querySelector('#feedback-form-view .btn-primary');
   btn.disabled = true;
-  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…';
 
-  fetch('https://api.web3forms.com/submit', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({
-      access_key: '00d1ac9a-2564-4e18-b497-38140c9d9796',
-      subject: subjectLine,
-      name: name || 'Anonymous',
-      email: email || '',
-      message: `Category: ${catLabels[feedbackCategory] || 'General'}\nTime: ${timeStr}\nFrom: ${name || 'Anonymous'}${email ? ' <' + email + '>' : ''}\n\n${msg}${screenshotNote}`,
-      from_name: 'Gradio Feedback',
-      botcheck: '',
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      const fb = {category:feedbackCategory, name, email, message:msg, attachments:attachedScreenshots.length, date:now.toISOString()};
-      const all = JSON.parse(localStorage.getItem('gradio-feedback')||'[]');
-      all.push(fb); localStorage.setItem('gradio-feedback', JSON.stringify(all));
-      document.getElementById('feedback-form-view').style.display = 'none';
-      document.getElementById('feedback-success-view').style.display = 'block';
-    } else {
-      throw new Error(data.message || 'Submission failed');
+  try {
+    // Upload screenshots to Imgur first
+    let screenshotNote = '';
+    if (attachedScreenshots.length > 0) {
+      btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Uploading screenshots…';
+      const uploadResults = await Promise.allSettled(
+        attachedScreenshots.map(s => uploadToCloudinary(s.data))
+      );
+      const lines = uploadResults.map((r, i) => {
+        if (r.status === 'fulfilled') return `• ${attachedScreenshots[i].name}: ${r.value}`;
+        return `• ${attachedScreenshots[i].name}: (upload failed)`;
+      });
+      screenshotNote = `\n\n---\n📎 Screenshots (${attachedScreenshots.length}):\n` + lines.join('\n');
     }
-  })
-  .catch(err => {
-    console.error('Web3Forms error:', err);
+
+    btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…';
+
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: 'YOUR_WEB3FORMS_ACCESS_KEY',
+        subject: subjectLine,
+        name: name || 'Anonymous',
+        email: email || '',
+        message: `Category: ${catLabels[feedbackCategory] || 'General'}\nTime: ${timeStr}\nFrom: ${name || 'Anonymous'}${email ? ' <' + email + '>' : ''}\n\n${msg}${screenshotNote}`,
+        from_name: 'Gradio Feedback',
+        botcheck: '',
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Submission failed');
+
+    const fb = {category:feedbackCategory, name, email, message:msg, attachments:attachedScreenshots.length, date:now.toISOString()};
+    const all = JSON.parse(localStorage.getItem('gradio-feedback')||'[]');
+    all.push(fb); localStorage.setItem('gradio-feedback', JSON.stringify(all));
+    document.getElementById('feedback-form-view').style.display = 'none';
+    document.getElementById('feedback-success-view').style.display = 'block';
+
+  } catch(err) {
+    console.error('Submission error:', err);
     alert('Failed to send message. Please try again.');
-  })
-  .finally(() => {
+  } finally {
     btn.disabled = false;
     btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Message';
-  });
+  }
 }
 function resetFeedback() {
   document.getElementById('fb-name').value='';

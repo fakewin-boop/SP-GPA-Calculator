@@ -1068,17 +1068,25 @@ function getClassification(gpa, inst) {
   const max = INSTITUTIONS[inst].maxGPA;
   const dc = INSTITUTIONS[inst].displayCap || max;
   if (dc <= 4.3) {
-    if (gpa >= dc * 0.93) return 'Distinction';
-    if (gpa >= dc * 0.75) return 'Merit';
-    if (gpa >= dc * 0.5)  return 'Pass';
-    return 'At Risk';
+    // 4.0 system ranges (from classification table)
+    if (gpa >= 3.85) return 'Distinction';
+    if (gpa >= 3.50) return 'Excellent';
+    if (gpa >= 3.00) return 'Very Good';
+    if (gpa >= 2.50) return 'Good';
+    if (gpa >= 2.00) return 'Pass';
+    if (gpa >= 1.50) return 'Room to Grow';
+    if (gpa >= 1.00) return 'Time to Lock In';
+    return 'Keep Fighting';
   } else {
-    if (gpa >= dc * 0.9)  return 'First Class Honours';
-    if (gpa >= dc * 0.8)  return 'Second Upper Honours';
-    if (gpa >= dc * 0.7)  return 'Second Lower Honours';
-    if (gpa >= dc * 0.6)  return 'Third Class Honours';
-    if (gpa >= dc * 0.4)  return 'Pass';
-    return 'At Risk';
+    // 5.0 system ranges (from classification table)
+    if (gpa >= 4.50) return 'Distinction (Highest)';
+    if (gpa >= 4.00) return 'Excellent';
+    if (gpa >= 3.50) return 'Very Good';
+    if (gpa >= 3.00) return 'Good';
+    if (gpa >= 2.00) return 'Pass';
+    if (gpa >= 1.50) return 'Room to Grow';
+    if (gpa >= 1.00) return 'Time to Lock In';
+    return 'Keep Fighting';
   }
 }
 
@@ -1547,9 +1555,7 @@ function renderProjection() {
   document.getElementById('comeback-content').style.display = noData ? 'none' : 'block';
   if (noData) {
     document.getElementById('planner-section-hdr').style.display = 'block';
-    document.getElementById('planner-empty').style.display = 'block';
-    document.getElementById('planner-grid').style.display = 'none';
-    document.getElementById('planner-overview').style.display = 'none';
+    renderPlanner();
     return;
   }
   document.getElementById('cb-current-gpa').textContent = gpa.toFixed(2);
@@ -1616,7 +1622,8 @@ function calcComeback() {
 // ── Planner ──
 function renderPlanner() {
   const empty = !plannerSems.length;
-  document.getElementById('planner-section-hdr').style.display = 'none'; // handled by comeback-content header in normal mode
+  const comebackVisible = document.getElementById('comeback-content').style.display !== 'none';
+  document.getElementById('planner-section-hdr').style.display = comebackVisible ? 'none' : 'block';
   document.getElementById('planner-empty').style.display = empty ? 'block' : 'none';
   document.getElementById('planner-grid').style.display = empty ? 'none' : 'grid';
   const grid = document.getElementById('planner-grid');
@@ -1663,7 +1670,10 @@ function renderPlanner() {
       </div>
       <div style="border-top:1px solid var(--border);padding-top:.65rem;margin-top:.65rem">
         <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.45rem;color:var(--fg-muted)"><span>Total credits</span><span class="font-semibold" style="color:var(--fg)">${tc}</span></div>
-        <button class="dashed-btn" onclick="plannerAddMod(${si})"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Module</button>
+        <div style="display:flex;gap:.5rem">
+          <button class="dashed-btn" style="flex:1" onclick="plannerAddMod(${si})"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Module</button>
+          <button class="dashed-btn" style="flex:1" onclick="plannerAddSem()"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Semester</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1939,7 +1949,7 @@ function exportPDF() {
   const classification = getClassification(gpa, state.institution);
   const totalCredits = allMods.reduce((s,m)=>s+(m.credits||0),0);
   const date = new Date().toLocaleDateString('en-SG',{year:'numeric',month:'long',day:'numeric'});
-  const PW=210, PH=297, ML=18, MR=18, MT=20, CW=PW-ML-MR;
+  const PW=210, PH=297, ML=20, MR=20, MT=20, CW=PW-ML-MR;
   let y = MT;
   // Header
   doc.setFillColor(47,82,224); doc.rect(0,0,PW,38,'F');
@@ -1992,7 +2002,7 @@ function exportPDF() {
     doc.text('MODULE',ML+3,y+5);
     doc.text('CREDITS',ML+CW*0.62,y+5,{align:'center'});
     doc.text('GRADE',ML+CW*0.78,y+5,{align:'center'});
-    doc.text('GRADE POINTS',ML+CW,y+5,{align:'right'});
+    doc.text('GRADE POINTS',ML+CW-2,y+5,{align:'right'});
     y+=7;
     sem.modules.forEach((m,mi) => {
       if (y > PH-30) { doc.addPage(); y=MT; }
@@ -2005,13 +2015,13 @@ function exportPDF() {
       doc.text((m.credits||0).toString(),ML+CW*0.62,y+5.5,{align:'center'});
       doc.setFont('helvetica','bold'); doc.text(m.grade||'—',ML+CW*0.78,y+5.5,{align:'center'});
       doc.setFont('helvetica','normal'); doc.setTextColor(47,82,224);
-      doc.text(m.grade?(pts*(m.credits||0)).toFixed(1):'—',ML+CW,y+5.5,{align:'right'});
+      doc.text(m.grade?(pts*(m.credits||0)).toFixed(1):'—',ML+CW-2,y+5.5,{align:'right'});
       doc.setTextColor(22,21,26); y+=8;
     });
     doc.setFillColor(220,228,255); doc.rect(ML,y,CW,8,'F');
     doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(47,82,224);
     doc.text(`Semester GPA: ${semGPA.toFixed(2)}`,ML+3,y+5.5);
-    doc.text(`${semCreds} credits total`,ML+CW,y+5.5,{align:'right'});
+    doc.text(`${semCreds} credits total`,ML+CW-2,y+5.5,{align:'right'});
     y+=14;
   });
   // Final summary

@@ -9,8 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300;1,9..144,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init('SGE0UAQ-3hjcUY4uh');</script>
 <style>
 :root {
   /* Light mode — clean & professional */
@@ -792,7 +790,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
                 </div>
                 <div id="json-calc-panel" style="display:none;padding:.9rem 1rem;border-top:1px solid var(--border)">
                   <p class="text-muted" style="font-size:.75rem;margin-bottom:.75rem">Exports calculator semesters, modules, grades, and custom schools.</p>
-                  <button class="btn btn-ghost btn-full" onclick="exportCalcJSON()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export Calculator JSON</button>
+                  <button class="btn btn-primary btn-full" onclick="exportCalcJSON()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export Calculator JSON</button>
                 </div>
               </div>
               <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
@@ -805,7 +803,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
                 </div>
                 <div id="json-proj-panel" style="display:none;padding:.9rem 1rem;border-top:1px solid var(--border)">
                   <p class="text-muted" style="font-size:.75rem;margin-bottom:.75rem">Exports semester plans, module workload, and projection settings.</p>
-                  <button class="btn btn-ghost btn-full" onclick="exportProjectionJSON()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export Projection JSON</button>
+                  <button class="btn btn-success btn-full" onclick="exportProjectionJSON()"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Export Projection JSON</button>
                 </div>
               </div>
             </div>
@@ -1819,39 +1817,44 @@ function submitFeedback() {
   const catLabels = {feature:'Feature Request', bug:'Bug Report', general:'General Feedback', other:'Other'};
   const subjectLine = `${catLabels[feedbackCategory] || 'Feedback'} — Gradio`;
 
-  const btn = document.querySelector('#feedback-form-view .btn-primary');
-  btn.disabled = true;
-  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…';
-
-  // Build screenshot info for the email body
   const screenshotNote = attachedScreenshots.length > 0
     ? `\n\n---\n📎 ${attachedScreenshots.length} screenshot(s) attached:\n` + attachedScreenshots.map(a => `• ${a.name}`).join('\n')
     : '';
 
-  // Include first screenshot as base64 if present (EmailJS template variable: {{screenshot}})
-  const screenshotData = attachedScreenshots.length > 0 ? attachedScreenshots[0].data : '';
-  const screenshotName = attachedScreenshots.length > 0 ? attachedScreenshots[0].name : '';
+  const btn = document.querySelector('#feedback-form-view .btn-primary');
+  btn.disabled = true;
+  btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…';
 
-  emailjs.send('service_fa090nl', 'template_f4cf58q', {
-    subject: subjectLine,
-    name: name || 'Anonymous',
-    from_email: email || 'Not provided',
-    email: email || 'noreply@gradio.app',
-    message: msg + screenshotNote,
-    time: timeStr,
-    screenshot: screenshotData,
-    screenshot_name: screenshotName,
-    screenshot_count: attachedScreenshots.length.toString(),
-  }).then(() => {
-    const fb = {category:feedbackCategory, name, email, message:msg, attachments:attachedScreenshots.length, date:now.toISOString()};
-    const all = JSON.parse(localStorage.getItem('gradio-feedback')||'[]');
-    all.push(fb); localStorage.setItem('gradio-feedback', JSON.stringify(all));
-    document.getElementById('feedback-form-view').style.display = 'none';
-    document.getElementById('feedback-success-view').style.display = 'block';
-  }).catch((err) => {
-    console.error('EmailJS error:', err);
-    alert('Failed to send message. Please try again or email us directly.');
-  }).finally(() => {
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      access_key: '00d1ac9a-2564-4e18-b497-38140c9d9796',
+      subject: subjectLine,
+      name: name || 'Anonymous',
+      email: email || '',
+      message: `Category: ${catLabels[feedbackCategory] || 'General'}\nTime: ${timeStr}\nFrom: ${name || 'Anonymous'}${email ? ' <' + email + '>' : ''}\n\n${msg}${screenshotNote}`,
+      from_name: 'Gradio Feedback',
+      botcheck: '',
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      const fb = {category:feedbackCategory, name, email, message:msg, attachments:attachedScreenshots.length, date:now.toISOString()};
+      const all = JSON.parse(localStorage.getItem('gradio-feedback')||'[]');
+      all.push(fb); localStorage.setItem('gradio-feedback', JSON.stringify(all));
+      document.getElementById('feedback-form-view').style.display = 'none';
+      document.getElementById('feedback-success-view').style.display = 'block';
+    } else {
+      throw new Error(data.message || 'Submission failed');
+    }
+  })
+  .catch(err => {
+    console.error('Web3Forms error:', err);
+    alert('Failed to send message. Please try again.');
+  })
+  .finally(() => {
     btn.disabled = false;
     btn.innerHTML = '<svg class="icon-sm" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Message';
   });

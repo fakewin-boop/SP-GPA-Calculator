@@ -710,6 +710,9 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
             </div>
             <div class="font-medium" style="flex-shrink:0;font-size:.77rem;margin-bottom:.65rem;font-weight:700;color:var(--fg-muted)">GPA Projection</div>
             <div id="cb-chart-wrap" style="flex-shrink:0;overflow-x:auto;overflow-y:hidden;"><canvas id="cb-chart" height="160"></canvas></div>
+            <div style="flex-shrink:0;padding:0 2px;margin-top:8px;">
+              <input id="cb-chart-slider" type="range" min="0" max="100" value="0" step="1" style="width:100%;height:3px;accent-color:var(--primary);cursor:pointer;margin:0;">
+            </div>
             <div id="cb-sem-targets" style="margin-top:1.1rem;flex:1;overflow-y:auto;min-height:0;padding-right:10px;" class="space-y"></div>
           </div>
         </div>
@@ -1573,6 +1576,13 @@ function renderProjection() {
   if (!document.getElementById('cb-target').value || parseFloat(document.getElementById('cb-target').value) > max)
     document.getElementById('cb-target').value = (max*0.85).toFixed(1);
   calcComeback(); renderPlanner();
+  // Wire up chart slider <-> chart-wrap scroll sync
+  const _wrap = document.getElementById('cb-chart-wrap');
+  const _slider = document.getElementById('cb-chart-slider');
+  if (_wrap && _slider) {
+    _slider.addEventListener('input', () => { _wrap.scrollLeft = _slider.value; });
+    _wrap.addEventListener('scroll', () => { _slider.value = _wrap.scrollLeft; });
+  }
 }
 
 // Per-semester credits storage (persisted across recalcs)
@@ -1632,6 +1642,17 @@ function calcComeback(preserveRows) {
   }
   const cbCanvas = document.getElementById('cb-chart');
   drawLineChart(cbCanvas, projData, max);
+  // Sync slider max with scrollable width
+  const wrap = document.getElementById('cb-chart-wrap');
+  const slider = document.getElementById('cb-chart-slider');
+  if (wrap && slider) {
+    setTimeout(() => {
+      const maxScroll = wrap.scrollWidth - wrap.clientWidth;
+      slider.max = maxScroll > 0 ? maxScroll : 0;
+      slider.style.display = maxScroll > 0 ? 'block' : 'none';
+      slider.value = wrap.scrollLeft;
+    }, 0);
+  }
 
   document.getElementById('cb-sem-targets').innerHTML = Array.from({length:remSems},(_,i)=>`
     <div style="padding:.8rem;border-radius:var(--radius-sm);background:var(--bg-surface)">

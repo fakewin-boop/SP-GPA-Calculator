@@ -1116,11 +1116,17 @@ function renderCalculator() {
 function changeInstitution() {
   const val = document.getElementById('inst-select').value;
   if (val !== state.institution) {
-    // Reset semesters to a single blank semester when switching schools
+    // Exit sim mode cleanly before changing institution
+    if (simMode) {
+      simMode = false; simState = null;
+      document.getElementById('sim-banner').style.display = 'none';
+      const btn = document.getElementById('sim-toggle-btn');
+      btn.classList.remove('sim-active');
+      btn.innerHTML = `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>What If?`;
+    }
     state.institution = val;
     state.semesters = [{id:Date.now().toString(), name:'Semester 1', modules:[]}];
     activeSemIdx = 0;
-    if (simState) { simState.institution = val; simState.semesters = JSON.parse(JSON.stringify(state.semesters)); }
   }
   saveState(); renderCalculator();
 }
@@ -1141,39 +1147,39 @@ function updateSemTabs() {
 function switchSem(i) { activeSemIdx = i; updateSemTabs(); updateModulesPanel(); }
 
 function renameSems() {
-  state.semesters.forEach((s,i) => { s.name = `Semester ${i+1}`; });
-  if (simState) simState.semesters.forEach((s,i) => { s.name = `Semester ${i+1}`; });
+  const target = simMode ? simState : state;
+  target.semesters.forEach((s,i) => { s.name = `Semester ${i+1}`; });
 }
 function addSem() {
-  const n = state.semesters.length + 1;
+  const target = simMode ? simState : state;
+  const n = target.semesters.length + 1;
   const newSem = {id:Date.now().toString(), name:`Semester ${n}`, modules:[]};
-  state.semesters.push(newSem);
-  if (simState) simState.semesters.push({...newSem, modules:[]});
-  activeSemIdx = state.semesters.length - 1;
-  saveState(); updateSemTabs(); updateModulesPanel(); updateGPACircle();
+  target.semesters.push(newSem);
+  if (!simMode) saveState();
+  activeSemIdx = target.semesters.length - 1;
+  updateSemTabs(); updateModulesPanel(); updateGPACircle();
   if (currentPage === 'dashboard') renderDashboard();
 }
 function deleteSem(i) {
-  if (state.semesters.length <= 1) return;
-  state.semesters.splice(i,1);
-  if (simState) simState.semesters.splice(i,1);
+  const target = simMode ? simState : state;
+  if (target.semesters.length <= 1) return;
+  target.semesters.splice(i,1);
   renameSems();
-  activeSemIdx = Math.min(activeSemIdx, state.semesters.length-1);
-  saveState(); updateSemTabs(); updateModulesPanel(); updateGPACircle();
+  activeSemIdx = Math.min(activeSemIdx, target.semesters.length-1);
+  if (!simMode) saveState();
+  updateSemTabs(); updateModulesPanel(); updateGPACircle();
   if (currentPage === 'dashboard') renderDashboard();
 }
 function deleteActiveSem() { deleteSem(activeSemIdx); }
 function reorderSem(from, to) {
   if (from === to) return;
-  const [sem] = state.semesters.splice(from, 1);
-  state.semesters.splice(to, 0, sem);
-  if (simState) {
-    const [ss] = simState.semesters.splice(from, 1);
-    simState.semesters.splice(to, 0, ss);
-  }
+  const target = simMode ? simState : state;
+  const [sem] = target.semesters.splice(from, 1);
+  target.semesters.splice(to, 0, sem);
   renameSems();
   activeSemIdx = to;
-  saveState(); updateSemTabs(); updateModulesPanel(); updateGPACircle();
+  if (!simMode) saveState();
+  updateSemTabs(); updateModulesPanel(); updateGPACircle();
   if (currentPage === 'dashboard') renderDashboard();
 }
 
@@ -1606,9 +1612,10 @@ function renderDashboard() {
   const gpa = calcGPA(allMods, state.institution);
   const inst = INSTITUTIONS[state.institution];
   const max = inst.displayCap || inst.maxGPA;
-  const empty = false; // always show dashboard content
-  document.getElementById('dash-empty').style.display = 'none';
-  document.getElementById('dash-content').style.display = 'block';
+  const empty = !allMods.length;
+  document.getElementById('dash-empty').style.display = empty ? 'block' : 'none';
+  document.getElementById('dash-content').style.display = empty ? 'none' : 'block';
+  if (empty) return;
   document.getElementById('dash-school-name').textContent = inst.name;
   document.getElementById('dash-gpa').textContent = gpa.toFixed(2);
   document.getElementById('dash-class').textContent = getClassification(gpa, state.institution);

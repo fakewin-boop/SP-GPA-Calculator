@@ -537,8 +537,8 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
                   <div class="drop-zone" id="pdf-drop-zone" onclick="document.getElementById('pdf-file-input').click()" ondragover="handleDragOver(event,'pdf-drop-zone')" ondragleave="handleDragLeave('pdf-drop-zone')" ondrop="handleDrop(event,'pdf')">
                     <input type="file" id="pdf-file-input" accept="application/pdf,.pdf" onchange="importPDF(event)">
                     <div class="drop-zone-icon"><svg class="icon-sm" style="color:var(--fg-muted)" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-                    <div style="font-size:.78rem;font-weight:600;margin-bottom:.2rem">Drop PDF transcript here</div>
-                    <div style="font-size:.72rem;color:var(--fg-subtle)">Gradio-exported PDFs supported</div>
+                    <div style="font-size:.78rem;font-weight:600;margin-bottom:.2rem">Drop PDF here</div>
+                    <div style="font-size:.72rem;color:var(--fg-subtle)">Gradio GPA or Projection PDFs</div>
                     <div class="upload-progress" id="pdf-progress"><div class="upload-progress-bar" id="pdf-progress-bar"></div></div>
                   </div>
                   <div class="privacy-notice"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Processed fully in-browser</div>
@@ -820,10 +820,10 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
               <div class="text-muted" style="font-size:.75rem">All module data, semesters, and planner entries will be permanently deleted.</div>
               <div class="confirm-btns">
                 <button class="btn btn-danger" style="flex:1;font-size:.78rem" onclick="clearData()">Yes, delete everything</button>
-                <button class="btn btn-ghost" style="flex:1;font-size:.78rem" onclick="document.getElementById('clear-confirm').style.display='none'">Cancel</button>
+                <button class="btn btn-ghost" style="flex:1;font-size:.78rem" onclick="document.getElementById('clear-confirm').style.display='none';document.getElementById('clear-all-btn').style.display='flex'">Cancel</button>
               </div>
             </div>
-            <button class="btn btn-danger-outline btn-full" onclick="document.getElementById('clear-confirm').style.display='block'"><svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Clear All Data</button>
+            <button id="clear-all-btn" class="btn btn-danger-outline btn-full" onclick="document.getElementById('clear-confirm').style.display='block';this.style.display='none'"><svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Clear All Data</button>
           </div>
         </div>
 
@@ -1390,7 +1390,10 @@ function handleDrop(e, type) {
 // ── Import JSON ──
 function showImportMsg(msg, ok) {
   const el = document.getElementById('import-message');
-  if (!el) return;
+  if (!el || el.offsetParent === null) {
+    if (!ok) alert(msg);
+    return;
+  }
   el.textContent = msg;
   el.style.background = ok ? 'var(--success-soft)' : 'var(--danger-soft)';
   el.style.color = ok ? 'var(--success)' : 'var(--danger)';
@@ -1432,8 +1435,163 @@ function importJSONFile(file) {
 // ── Import PDF (Gradio-exported PDFs) ──
 function importPDF(e) { const f=e.target.files?.[0]; if(f) importPDFFile(f); }
 function importPDFFile(file) {
-  animateProgress('pdf-progress-bar', 800);
-  showImportMsg('PDF import: Please use JSON backup for full data restoration. PDF format is used for reports only.', false);
+  animateProgress('pdf-progress-bar', 1200);
+  // Dynamically load PDF.js if not already loaded
+  function loadPDFJS(cb) {
+    if (window.pdfjsLib) { cb(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      cb();
+    };
+    s.onerror = () => showImportMsg('Could not load PDF reader library. Check your connection.', false);
+    document.head.appendChild(s);
+  }
+  loadPDFJS(async () => {
+    try {
+      const arrayBuf = await file.arrayBuffer();
+      const pdf = await window.pdfjsLib.getDocument({data: arrayBuf}).promise;
+      let fullText = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        fullText += content.items.map(it => it.str).join(' ') + '\n';
+      }
+      // Detect PDF type
+      const isGPA = fullText.includes('Singapore GPA Report') || fullText.includes('GPA Calculator');
+      const isProjection = fullText.includes('Academic Projection');
+      if (!isGPA && !isProjection) {
+        showImportMsg('This does not look like a Gradio-exported PDF. Please use a Gradio GPA or Projection PDF.', false);
+        return;
+      }
+      if (isGPA) {
+        importGPAFromPDFText(fullText);
+      } else {
+        importProjectionFromPDFText(fullText);
+      }
+    } catch(err) {
+      console.error('PDF parse error:', err);
+      showImportMsg('Could not read PDF. Make sure it is a Gradio-exported PDF.', false);
+    }
+  });
+}
+
+function importGPAFromPDFText(text) {
+  try {
+    // Detect institution from text
+    let detectedInst = 'SP';
+    const instKeys = Object.keys(INSTITUTIONS);
+    for (const k of instKeys) {
+      if (text.includes(INSTITUTIONS[k].name)) { detectedInst = k; break; }
+    }
+    // Parse semesters: find "Semester N" blocks
+    // Lines look like: "Semester 1 GPA: 3.85 · 10 credits · 3 modules"
+    // Then module rows: "test 1  4  B+  10.5" etc.
+    const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+    const semesters = [];
+    let curSem = null;
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
+      // New semester header
+      const semMatch = l.match(/^Semester\s+(\d+)\s+GPA:/i);
+      if (semMatch) {
+        if (curSem) semesters.push(curSem);
+        curSem = { name: `Semester ${semMatch[1]}`, modules: [] };
+        continue;
+      }
+      // Module rows: name, credits, grade, grade-points — detect by presence of a letter grade
+      // PDF text items can be jumbled; we look for patterns like "ModName credits grade gradepoints"
+      if (curSem) {
+        // skip footer/summary lines
+        if (/^(Semester GPA|Final Cumulative|Gradio|Generated|Page|GPA Scale|CUMULATIVE|CLASSIFICATION|TOTAL|SEMESTERS|MODULE|CREDITS|GRADE)/i.test(l)) continue;
+        // Match: anything then a number (credits) then a grade letter then a number (points)
+        const modMatch = l.match(/^(.+?)\s+(\d+)\s+([A-F][+-]?)\s+([\d.]+)\s*$/);
+        if (modMatch) {
+          const name = modMatch[1].trim();
+          const credits = parseInt(modMatch[2]);
+          const grade = modMatch[3];
+          if (name && credits > 0 && grade) {
+            curSem.modules.push({ id: Date.now() + Math.random(), name, credits, grade });
+          }
+          continue;
+        }
+        // Sometimes PDF.js merges tokens differently; try splitting the line by multiple spaces
+        const parts = l.split(/\s{2,}/);
+        if (parts.length >= 3) {
+          const possibleGrade = parts[parts.length - 2];
+          const possibleCredits = parseInt(parts[parts.length - 3] || '');
+          if (/^[A-F][+-]?$/.test(possibleGrade) && possibleCredits > 0) {
+            const name = parts.slice(0, parts.length - 3).join(' ').trim() || parts[0];
+            if (name) {
+              curSem.modules.push({ id: Date.now() + Math.random(), name, credits: possibleCredits, grade: possibleGrade });
+            }
+          }
+        }
+      }
+    }
+    if (curSem) semesters.push(curSem);
+    // Filter out empty semesters and deduplicate modules
+    const validSems = semesters.filter(s => s.modules.length > 0);
+    if (!validSems.length) {
+      // Fallback: try a more lenient parse
+      showImportMsg('Could not extract module data from this GPA PDF. Try importing a JSON backup instead.', false);
+      return;
+    }
+    const newState = Object.assign({}, state, { institution: detectedInst, semesters: validSems });
+    localStorage.setItem('gradio-data', JSON.stringify(newState));
+    showImportMsg(`GPA data imported! Found ${validSems.length} semester(s) with ${validSems.reduce((s,sem)=>s+sem.modules.length,0)} module(s). Reloading...`, true);
+    setTimeout(() => location.reload(), 1400);
+  } catch(e) {
+    console.error('GPA PDF parse error:', e);
+    showImportMsg('Failed to parse GPA PDF data. Try using a JSON export instead.', false);
+  }
+}
+
+function importProjectionFromPDFText(text) {
+  try {
+    // Projection PDF has planned semesters with: name, credits, stress
+    // Module rows: name, credits, difficulty, type
+    const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+    const semesters = [];
+    let curSem = null;
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
+      // Semester header: "Semester 1  10 credits · Stress: 39%"
+      const semMatch = l.match(/^(Semester\s+\d+)/i);
+      if (semMatch && l.match(/credits/i)) {
+        if (curSem) semesters.push(curSem);
+        curSem = { id: Date.now() + Math.random(), name: semMatch[1], modules: [] };
+        continue;
+      }
+      if (curSem) {
+        if (/^(MODULE|CREDITS|DIFFICULTY|TYPE|Planned Semesters|Academic Projection|Gradio|Generated|Page|Current CGPA)/i.test(l)) continue;
+        // Module: name credits difficulty type
+        const parts = l.split(/\s{2,}/);
+        if (parts.length >= 3) {
+          const name = parts[0].trim();
+          const credits = parseInt(parts[1]);
+          const difficulty = (parts[2]||'medium').toLowerCase();
+          const type = (parts[3]||'theory').toLowerCase();
+          if (name && credits > 0 && /^(easy|medium|hard)$/.test(difficulty)) {
+            curSem.modules.push({ id: Date.now() + Math.random(), name, credits, difficulty, type });
+          }
+        }
+      }
+    }
+    if (curSem) semesters.push(curSem);
+    const validSems = semesters.filter(s => s.modules.length > 0);
+    if (!validSems.length) {
+      showImportMsg('Could not extract planner data from this Projection PDF. Try importing a JSON backup instead.', false);
+      return;
+    }
+    localStorage.setItem('gradio-planner', JSON.stringify(validSems));
+    showImportMsg(`Projection data imported! Found ${validSems.length} planned semester(s). Reloading...`, true);
+    setTimeout(() => location.reload(), 1400);
+  } catch(e) {
+    console.error('Projection PDF parse error:', e);
+    showImportMsg('Failed to parse Projection PDF data. Try using a JSON export instead.', false);
+  }
 }
 
 // ── Screenshots ──

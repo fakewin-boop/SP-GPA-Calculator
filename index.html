@@ -995,7 +995,26 @@ function loadState() {
     const s = localStorage.getItem('gradio-data'); if (s) state = JSON.parse(s);
     const p = localStorage.getItem('gradio-planner'); if (p) plannerSems = JSON.parse(p);
     const c = localStorage.getItem('gradio-custom-schools'); if (c) { const cs = JSON.parse(c); Object.assign(INSTITUTIONS, cs); }
+    const proj = localStorage.getItem('gradio-projection');
+    if (proj) {
+      const projData = JSON.parse(proj);
+      if (projData.semCredits && Array.isArray(projData.semCredits)) window.cbSemCredits = projData.semCredits.slice();
+      if (projData.semTargets && Array.isArray(projData.semTargets)) window.cbSemTargets = projData.semTargets.slice();
+      // Apply target/sems inputs after DOM is ready
+      if (projData.targetGPA != null || projData.remainingSems != null) {
+        window._pendingProjection = projData;
+      }
+    }
   } catch(e) {}
+}
+function applyPendingProjection() {
+  const proj = window._pendingProjection;
+  if (!proj) return;
+  const targetEl = document.getElementById('cb-target');
+  const semsEl = document.getElementById('cb-sems');
+  if (targetEl && proj.targetGPA != null) targetEl.value = proj.targetGPA;
+  if (semsEl && proj.remainingSems != null) semsEl.value = proj.remainingSems;
+  window._pendingProjection = null;
 }
 function saveState() {
   localStorage.setItem('gradio-data', JSON.stringify(state));
@@ -1391,6 +1410,7 @@ function importJSONFile(file) {
       else localStorage.setItem('gradio-data', JSON.stringify(d));
       if (d.planner) localStorage.setItem('gradio-planner', JSON.stringify(d.planner));
       if (d.customSchools) localStorage.setItem('gradio-custom-schools', JSON.stringify(d.customSchools));
+      if (d.projection) localStorage.setItem('gradio-projection', JSON.stringify(d.projection));
       showImportMsg('Data imported successfully! Reloading...', true);
       setTimeout(() => location.reload(), 1200);
     } catch { showImportMsg('Invalid file format. Please use a Gradio JSON backup.', false); }
@@ -1715,6 +1735,7 @@ function drawLineChart(canvas, data, maxVal) {
 
 // ── Academic Projection ──
 function renderProjection() {
+  applyPendingProjection();
   const allMods = state.semesters.flatMap(s=>s.modules);
   const gpa = calcGPA(allMods, state.institution);
   const max = (INSTITUTIONS[state.institution].displayCap||INSTITUTIONS[state.institution].maxGPA);
@@ -2325,7 +2346,15 @@ function toggleExportPanel(id) {
   chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
 }
 function exportCalcJSON() {
-  const data = {calculator:state, customSchools:JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}'), exportedAt:new Date().toISOString()};
+  const targetEl = document.getElementById('cb-target');
+  const semsEl = document.getElementById('cb-sems');
+  const projection = {
+    targetGPA: targetEl ? parseFloat(targetEl.value) || null : null,
+    remainingSems: semsEl ? parseInt(semsEl.value) || null : null,
+    semCredits: window.cbSemCredits ? window.cbSemCredits.slice() : [],
+    semTargets: window.cbSemTargets ? window.cbSemTargets.slice() : []
+  };
+  const data = {calculator:state, projection, customSchools:JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}'), exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download=`gradio-calculator-${new Date().toISOString().split('T')[0]}.json`;
@@ -2339,7 +2368,7 @@ function exportJSON() {
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 function clearData() {
-  ['gradio-data','gradio-planner','gradio-custom-schools','gradio-feedback'].forEach(k=>localStorage.removeItem(k));
+  ['gradio-data','gradio-planner','gradio-custom-schools','gradio-feedback','gradio-projection'].forEach(k=>localStorage.removeItem(k));
   location.reload();
 }
 

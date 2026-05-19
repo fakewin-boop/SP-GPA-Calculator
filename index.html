@@ -719,6 +719,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
       </div>
 
       <!-- Planner section removed — workload tracking removed per update -->
+    </div><!-- end projection-page -->
 
     <!-- ═══ EXPORT ═══ -->
     <div class="app-page" id="export-page">
@@ -1799,18 +1800,17 @@ function calcComeback(preserveRows) {
     detail.innerHTML=`You need an average of <strong>${Math.min(required,internalMax).toFixed(2)}</strong> GPA over the next ${remSems} semester${remSems!==1?'s':''} (${remCreds} credits total) to reach <strong>${getClassification(target, state.institution)}</strong>. Higher-credit semesters have more impact on your cumulative GPA.`;
   }
 
-  // Chart — accumulate credits progressively per semester (credit-weighted)
+  // Chart — use per-semester targets when set, otherwise use the uniform required GPA
   const projData = [{name:'Now', gpa}];
-  let cumCreds = completedCreds;
-  let cumPoints = rawGPA * completedCreds;
+  let cumCreds2 = completedCreds;
+  let cumPoints2 = rawGPA * completedCreds;
   for (let i=0; i<remSems; i++) {
     const thisSemCreds = semCreds[i];
-    // Each semester gets the same "required per semester" GPA since we solve for uniform target,
-    // but the cumulative GPA is properly weighted by credits
-    const semGPA = possible ? Math.min(required, internalMax) : gpa;
-    cumPoints += semGPA * thisSemCreds;
-    cumCreds += thisSemCreds;
-    const projGPA = parseFloat(Math.min(cumPoints / cumCreds, max).toFixed(2));
+    const customTarget = (window.cbSemTargets && window.cbSemTargets[i] != null) ? window.cbSemTargets[i] : null;
+    const semGPA = customTarget !== null ? Math.min(customTarget, internalMax) : (possible ? Math.min(required, internalMax) : gpa);
+    cumPoints2 += semGPA * thisSemCreds;
+    cumCreds2 += thisSemCreds;
+    const projGPA = parseFloat(Math.min(cumPoints2 / cumCreds2, max).toFixed(2));
     projData.push({name:`+${i+1}sem`, gpa: projGPA});
   }
   const cbCanvas = document.getElementById('cb-chart');
@@ -1827,19 +1827,30 @@ function calcComeback(preserveRows) {
     }, 0);
   }
 
+  let cumCreds3 = completedCreds, cumPoints3 = rawGPA * completedCreds;
   document.getElementById('cb-sem-targets').innerHTML = Array.from({length:remSems},(_,i)=>{
     const thisSemCreds = semCreds[i];
-    const credsBefore = completedCreds + semCreds.slice(0,i).reduce((s,c)=>s+c,0);
-    const credsAfter = credsBefore + thisSemCreds;
-    const semGPA = possible ? Math.min(required, internalMax) : null;
-    const cumGPAAfter = semGPA !== null ? Math.min((rawGPA*completedCreds + semGPA*semCreds.slice(0,i+1).reduce((s,c)=>s+c,0)) / credsAfter, max) : null;
-    return `<div style="padding:.8rem;border-radius:var(--radius-sm);background:var(--bg-surface)">
+    const customTarget = (window.cbSemTargets && window.cbSemTargets[i] != null) ? window.cbSemTargets[i] : null;
+    const semGPA = customTarget !== null ? Math.min(customTarget, internalMax) : (possible ? Math.min(required, internalMax) : null);
+    cumPoints3 += (semGPA ?? gpa) * thisSemCreds;
+    cumCreds3 += thisSemCreds;
+    const cumGPAAfter = parseFloat(Math.min(cumPoints3 / cumCreds3, max).toFixed(2));
+    const isCustom = customTarget !== null;
+    const meetsOverall = semGPA !== null && cumGPAAfter >= target - 0.005;
+    const barColor = semGPA === null ? 'var(--fg-subtle)' : semGPA >= internalMax*0.9 ? 'var(--danger)' : semGPA >= internalMax*0.75 ? 'var(--warning)' : 'var(--success)';
+    return `<div style="padding:.8rem;border-radius:var(--radius-sm);background:var(--bg-surface);border:1px solid ${isCustom?'var(--primary)':'var(--border)'}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">
-        <span class="text-muted" style="font-size:.75rem">Semester ${startSemNum+i} · ${thisSemCreds} credits</span>
-        <span class="font-semibold" style="font-size:.87rem">${semGPA !== null ? semGPA.toFixed(2) : 'N/A'}</span>
+        <div>
+          <span class="text-muted" style="font-size:.75rem">Semester ${startSemNum+i} · ${thisSemCreds} credits</span>
+          ${isCustom ? '<span style="font-size:.62rem;font-weight:700;color:var(--primary);margin-left:.4rem;background:var(--primary-soft);padding:.05rem .3rem;border-radius:99px">custom</span>' : ''}
+        </div>
+        <span class="font-semibold" style="font-size:.87rem;color:${barColor}">${semGPA !== null ? semGPA.toFixed(2) : 'N/A'}</span>
       </div>
-      <div class="prog-track"><div class="prog-fill" style="width:${semGPA !== null?(Math.min(semGPA,internalMax)/internalMax*100).toFixed(0):0}%;background:${semGPA!==null&&semGPA>=internalMax*0.9?'var(--danger)':semGPA!==null&&semGPA>=internalMax*0.75?'var(--warning)':'var(--success)'}"></div></div>
-      ${cumGPAAfter !== null ? `<div style="font-size:.68rem;color:var(--fg-muted);margin-top:.25rem">Cumulative after: <strong style="color:var(--fg)">${cumGPAAfter.toFixed(2)}</strong></div>` : ''}
+      <div style="height:4px;border-radius:99px;background:var(--bg-hover);margin-bottom:.3rem"><div style="height:100%;border-radius:99px;width:${semGPA !== null?(Math.min(semGPA,internalMax)/internalMax*100).toFixed(0):0}%;background:${barColor};transition:width .4s"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:.68rem;color:var(--fg-muted)">Cumulative after: <strong style="color:${meetsOverall?'var(--success)':'var(--fg)'}">${cumGPAAfter.toFixed(2)}</strong></div>
+        ${meetsOverall ? '<span style="font-size:.62rem;color:var(--success);font-weight:700">✓ on track</span>' : ''}
+      </div>
     </div>`;
   }).join('');
 
@@ -1854,6 +1865,8 @@ function calcComeback(preserveRows) {
       rowsContainer.innerHTML = Array.from({length: remSems}, (_, i) => {
         const semNum = startSemNum + i;
         const modCount = window.cbSemModules ? (window.cbSemModules[i] || 5) : 5;
+        const semTarget = window.cbSemTargets ? (window.cbSemTargets[i] ?? null) : null;
+        const displayTarget = semTarget !== null ? semTarget : (possible ? Math.min(required, internalMax).toFixed(2) : '');
         return `<div class="cb-sem-row" style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .75rem;border-radius:var(--radius-sm);background:var(--bg-surface);gap:.75rem;flex-wrap:wrap">
           <span style="font-size:.82rem;font-weight:600;color:var(--fg);white-space:nowrap">Semester ${semNum}</span>
           <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
@@ -1867,6 +1880,13 @@ function calcComeback(preserveRows) {
                 oninput="if(!window.cbSemModules)window.cbSemModules=[];window.cbSemModules[${i}]=Math.max(1,parseInt(this.value)||1)">
               <span style="font-size:.75rem;color:var(--fg-muted)">modules</span>
             </div>
+            <div style="display:flex;align-items:center;gap:.4rem">
+              <span style="font-size:.75rem;color:var(--fg-muted)">Target:</span>
+              <input type="number" value="${displayTarget}" min="0" max="${internalMax}" step="0.1" placeholder="auto"
+                style="width:68px;padding:.22rem .38rem;font-size:.78rem;border-radius:var(--radius-sm);border:1px solid var(--primary);background:var(--primary-soft);color:var(--primary);font-family:inherit;font-weight:700;text-align:center"
+                oninput="if(!window.cbSemTargets)window.cbSemTargets=[];window.cbSemTargets[${i}]=this.value===''?null:Math.min(parseFloat(this.value)||0,${internalMax});calcComeback(true)"
+                onblur="if(this.value===''&&window.cbSemTargets){window.cbSemTargets[${i}]=null;calcComeback(true)}">
+            </div>
           </div>
         </div>`;
       }).join('');
@@ -1876,14 +1896,11 @@ function calcComeback(preserveRows) {
   }
 }
 
-// ── Planner ──
+// ── Planner (stubbed — workload section removed) ──
 function renderPlanner() {
-  const empty = !plannerSems.length;
-  const comebackVisible = document.getElementById('comeback-content').style.display !== 'none';
-  document.getElementById('planner-section-hdr').style.display = comebackVisible ? 'none' : 'block';
-  document.getElementById('planner-empty').style.display = empty ? 'block' : 'none';
-  document.getElementById('planner-grid').style.display = empty ? 'none' : 'grid';
+  // Planner/workload UI removed; function kept to avoid errors from old references
   const grid = document.getElementById('planner-grid');
+  if (!grid) return; // DOM elements removed, bail out safely
   grid.innerHTML = plannerSems.map((sem,si) => {
     const stress = calcStress(sem);
     const tc = sem.modules.reduce((s,m)=>s+(m.credits||0),0);
@@ -1939,6 +1956,7 @@ function renderPlanner() {
     </div>`;
   }).join('');
   const plOverview = document.getElementById('planner-overview');
+  if (!plOverview) return;
   if (!empty) {
     const allPMods = plannerSems.flatMap(s=>s.modules);
     const avgStress = plannerSems.reduce((s,sem)=>s+calcStress(sem),0)/plannerSems.length;

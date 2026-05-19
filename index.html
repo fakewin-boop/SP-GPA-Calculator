@@ -1485,56 +1485,50 @@ function importGPAFromPDFText(text) {
     for (const k of instKeys) {
       if (text.includes(INSTITUTIONS[k].name)) { detectedInst = k; break; }
     }
-    // Parse semesters: find "Semester N" blocks
-    // Lines look like: "Semester 1 GPA: 3.85 · 10 credits · 3 modules"
-    // Then module rows: "test 1  4  B+  10.5" etc.
+
     const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
     const semesters = [];
     let curSem = null;
-    for (let i = 0; i < lines.length; i++) {
-      const l = lines[i];
-      // New semester header
-      const semMatch = l.match(/^Semester\s+(\d+)\s+GPA:/i);
-      if (semMatch) {
+    const SKIP = /^(Semester GPA|Final Cumulative|Gradio|Generated|Page \d|GPA Scale|CUMULATIVE|CLASSIFICATION|TOTAL CREDITS|SEMESTERS|MODULE|CREDITS|GRADE POINTS|Distinction|Merit|Pass|Fail|\d+\.\d+\s*(\/|\·)|Singapore |Academic)/i;
+
+    for (const l of lines) {
+      // Semester header — "Semester 1 GPA: 3.85 ..." or "Semester 1  GPA: ..."
+      const semMatch = l.match(/^Semester\s+(\d+)\s/i);
+      if (semMatch && /GPA:/i.test(l)) {
         if (curSem) semesters.push(curSem);
         curSem = { name: `Semester ${semMatch[1]}`, modules: [] };
         continue;
       }
-      // Module rows: name, credits, grade, grade-points — detect by presence of a letter grade
-      // PDF text items can be jumbled; we look for patterns like "ModName credits grade gradepoints"
-      if (curSem) {
-        // skip footer/summary lines
-        if (/^(Semester GPA|Final Cumulative|Gradio|Generated|Page|GPA Scale|CUMULATIVE|CLASSIFICATION|TOTAL|SEMESTERS|MODULE|CREDITS|GRADE)/i.test(l)) continue;
-        // Match: anything then a number (credits) then a grade letter then a number (points)
-        const modMatch = l.match(/^(.+?)\s+(\d+)\s+([A-F][+-]?)\s+([\d.]+)\s*$/);
-        if (modMatch) {
-          const name = modMatch[1].trim();
-          const credits = parseInt(modMatch[2]);
-          const grade = modMatch[3];
-          if (name && credits > 0 && grade) {
-            curSem.modules.push({ id: Date.now() + Math.random(), name, credits, grade });
-          }
-          continue;
-        }
-        // Sometimes PDF.js merges tokens differently; try splitting the line by multiple spaces
-        const parts = l.split(/\s{2,}/);
-        if (parts.length >= 3) {
-          const possibleGrade = parts[parts.length - 2];
-          const possibleCredits = parseInt(parts[parts.length - 3] || '');
-          if (/^[A-F][+-]?$/.test(possibleGrade) && possibleCredits > 0) {
-            const name = parts.slice(0, parts.length - 3).join(' ').trim() || parts[0];
-            if (name) {
-              curSem.modules.push({ id: Date.now() + Math.random(), name, credits: possibleCredits, grade: possibleGrade });
-            }
-          }
-        }
+      if (!curSem) continue;
+      if (SKIP.test(l)) continue;
+
+      // Parse module rows by working from the RIGHT:
+      // Format: "<name tokens...> <credits:int> <grade:letter> <points:float>"
+      // Split on whitespace, grade is always a valid letter grade token
+      const tokens = l.split(/\s+/);
+      if (tokens.length < 3) continue;
+
+      // Find grade token (e.g. A, B+, C-, F) — scan from right, skip last token (grade points)
+      let gradeIdx = -1;
+      for (let ti = tokens.length - 2; ti >= 1; ti--) {
+        if (/^[A-F][+-]?$/.test(tokens[ti])) { gradeIdx = ti; break; }
       }
+      if (gradeIdx < 1) continue;
+
+      const creditsIdx = gradeIdx - 1;
+      const credits = parseInt(tokens[creditsIdx]);
+      if (isNaN(credits) || credits <= 0 || credits > 30) continue;
+
+      const name = tokens.slice(0, creditsIdx).join(' ').trim();
+      const grade = tokens[gradeIdx];
+      if (!name || !grade) continue;
+
+      curSem.modules.push({ id: Date.now() + Math.random(), name, credits, grade });
     }
     if (curSem) semesters.push(curSem);
-    // Filter out empty semesters and deduplicate modules
+
     const validSems = semesters.filter(s => s.modules.length > 0);
     if (!validSems.length) {
-      // Fallback: try a more lenient parse
       showImportMsg('Could not extract module data from this GPA PDF. Try importing a JSON backup instead.', false);
       return;
     }
@@ -1550,36 +1544,56 @@ function importGPAFromPDFText(text) {
 
 function importProjectionFromPDFText(text) {
   try {
-    // Projection PDF has planned semesters with: name, credits, stress
-    // Module rows: name, credits, difficulty, type
     const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
     const semesters = [];
     let curSem = null;
-    for (let i = 0; i < lines.length; i++) {
-      const l = lines[i];
-      // Semester header: "Semester 1  10 credits · Stress: 39%"
-      const semMatch = l.match(/^(Semester\s+\d+)/i);
-      if (semMatch && l.match(/credits/i)) {
+    const SKIP = /^(MODULE|CREDITS|DIFFICULTY|TYPE|Planned Semesters|Academic Projection|Gradio|Generated|Page \d|Current CGPA|Singapore )/i;
+    const DIFFICULTIES = ['easy', 'medium', 'hard'];
+    const TYPES = ['theory', 'practical', 'lab', 'project', 'mixed'];
+
+    for (const l of lines) {
+      // Semester header: "Semester 1 10 credits · Stress: 39%"
+      // Must have "credits" in it and NOT have "GPA:" (that's the GPA report)
+      const semMatch = l.match(/^(Semester\s+\d+)\s/i);
+      if (semMatch && /credits/i.test(l) && !/GPA:/i.test(l)) {
         if (curSem) semesters.push(curSem);
         curSem = { id: Date.now() + Math.random(), name: semMatch[1], modules: [] };
         continue;
       }
-      if (curSem) {
-        if (/^(MODULE|CREDITS|DIFFICULTY|TYPE|Planned Semesters|Academic Projection|Gradio|Generated|Page|Current CGPA)/i.test(l)) continue;
-        // Module: name credits difficulty type
-        const parts = l.split(/\s{2,}/);
-        if (parts.length >= 3) {
-          const name = parts[0].trim();
-          const credits = parseInt(parts[1]);
-          const difficulty = (parts[2]||'medium').toLowerCase();
-          const type = (parts[3]||'theory').toLowerCase();
-          if (name && credits > 0 && /^(easy|medium|hard)$/.test(difficulty)) {
-            curSem.modules.push({ id: Date.now() + Math.random(), name, credits, difficulty, type });
-          }
-        }
+      if (!curSem) continue;
+      if (SKIP.test(l)) continue;
+
+      // Module rows: "<name> <credits> <difficulty> <type>"
+      // Work from right: type is last, difficulty is 2nd-to-last, credits is 3rd-to-last
+      const tokens = l.split(/\s+/);
+      if (tokens.length < 3) continue;
+
+      // Find type token from right
+      let typeIdx = -1;
+      for (let ti = tokens.length - 1; ti >= 2; ti--) {
+        if (TYPES.includes(tokens[ti].toLowerCase())) { typeIdx = ti; break; }
       }
+      // Find difficulty just before type (or at end if no type found)
+      let diffIdx = -1;
+      const searchEnd = typeIdx > -1 ? typeIdx - 1 : tokens.length - 1;
+      for (let ti = searchEnd; ti >= 1; ti--) {
+        if (DIFFICULTIES.includes(tokens[ti].toLowerCase())) { diffIdx = ti; break; }
+      }
+      if (diffIdx < 1) continue;
+
+      const creditsIdx = diffIdx - 1;
+      const credits = parseInt(tokens[creditsIdx]);
+      if (isNaN(credits) || credits <= 0 || credits > 30) continue;
+
+      const name = tokens.slice(0, creditsIdx).join(' ').trim();
+      const difficulty = tokens[diffIdx].toLowerCase();
+      const type = typeIdx > -1 ? tokens[typeIdx].toLowerCase() : 'theory';
+      if (!name) continue;
+
+      curSem.modules.push({ id: Date.now() + Math.random(), name, credits, difficulty, type });
     }
     if (curSem) semesters.push(curSem);
+
     const validSems = semesters.filter(s => s.modules.length > 0);
     if (!validSems.length) {
       showImportMsg('Could not extract planner data from this Projection PDF. Try importing a JSON backup instead.', false);

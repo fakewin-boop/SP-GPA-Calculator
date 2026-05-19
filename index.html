@@ -1457,12 +1457,20 @@ function importGPAFromPDFText(text) {
     let curSem = null;
     const SKIP = /^(Semester GPA|Final Cumulative|Gradio|Generated|Page \d|GPA Scale|CUMULATIVE|CLASSIFICATION|TOTAL CREDITS|SEMESTERS|MODULE|CREDITS|GRADE POINTS|Distinction|Merit|Pass|Fail|\d+\.\d+\s*(\/|\·)|Singapore |Academic)/i;
 
+    let semCounter = 0;
     for (const l of lines) {
-      // Semester header — "Semester 1 GPA: 3.85 ..." or "Semester 1  GPA: ..."
+      // Semester header — matches:
+      //   "Semester 1 GPA: 3.85"  (standard)
+      //   "Y1S1 GPA: 3.85"        (renamed)
+      //   "Semester 1  GPA: ..."  (extra spaces)
+      //   Any line with "GPA:" that isn't a cumulative total line
       const semMatch = l.match(/^Semester\s+(\d+)\s/i);
-      if (semMatch && /GPA:/i.test(l)) {
+      const hasGPALabel = /GPA:/i.test(l) && !/Final Cumulative|CGPA/i.test(l);
+      if (hasGPALabel && !SKIP.test(l)) {
         if (curSem) semesters.push(curSem);
-        curSem = { name: `Semester ${semMatch[1]}`, modules: [] };
+        semCounter++;
+        const semName = semMatch ? `Semester ${semMatch[1]}` : `Semester ${semCounter}`;
+        curSem = { name: semName, modules: [] };
         continue;
       }
       if (!curSem) continue;
@@ -1795,16 +1803,18 @@ function calcComeback(preserveRows) {
   }
   const cbCanvas = document.getElementById('cb-chart');
   drawLineChart(cbCanvas, projData, max);
-  // Sync slider max with scrollable width
+  // Sync slider max with scrollable width — debounced to prevent flicker
   const wrap = document.getElementById('cb-chart-wrap');
   const slider = document.getElementById('cb-chart-slider');
   if (wrap && slider) {
-    setTimeout(() => {
+    clearTimeout(window._sliderSyncTimer);
+    window._sliderSyncTimer = setTimeout(() => {
       const maxScroll = wrap.scrollWidth - wrap.clientWidth;
-      slider.max = maxScroll > 0 ? maxScroll : 0;
-      slider.style.display = maxScroll > 0 ? 'block' : 'none';
-      slider.value = wrap.scrollLeft;
-    }, 0);
+      const newMax = maxScroll > 0 ? maxScroll : 0;
+      if (parseInt(slider.max) !== newMax) slider.max = newMax;
+      slider.style.display = newMax > 0 ? 'block' : 'none';
+      slider.value = Math.min(parseInt(slider.value) || 0, newMax);
+    }, 60);
   }
 
   let cumCreds3 = completedCreds, cumPoints3 = rawGPA * completedCreds;

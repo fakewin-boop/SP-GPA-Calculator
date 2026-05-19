@@ -98,6 +98,10 @@ html.dark .sim-active{background:rgba(212,149,32,0.2)!important;color:var(--warn
 
 /* ── Inputs ── */
 input[type=text],input[type=number],input[type=email],select,textarea{width:100%;padding:.62rem .88rem;border-radius:var(--radius-sm);border:1px solid var(--border-mid);background:var(--bg);color:var(--fg);font-family:inherit;font-size:.85rem;outline:none;transition:border .17s,box-shadow .17s;-webkit-appearance:none;}
+/* Spinners hidden — consistent across light/dark */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;}
 input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
 select option{background:var(--bg-card);color:var(--fg);}
 label.field-label{display:block;font-size:.72rem;font-weight:700;color:var(--fg-muted);margin-bottom:.35rem;letter-spacing:.03em;text-transform:uppercase;}
@@ -323,6 +327,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
   .sem-tab{padding:.38rem .65rem;font-size:.73rem;}
   /* Dashboard mobile */
   .stat-val{font-size:1.6rem;}
+  #dash-content > div:nth-child(2){grid-template-columns:1fr!important;}
   /* Feedback mobile */
   .grid-2[style*="align-items:start"]{gap:.75rem;}
   /* Institution select on mobile */
@@ -424,16 +429,16 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
         <div class="grid-4" style="margin-bottom:1.25rem">
           <div class="stat-card card"><div class="stat-label">Cumulative GPA</div><div class="stat-val" id="dash-gpa">0.00</div><div class="stat-sub" id="dash-class">—</div></div>
           <div class="stat-card card" style="border:1.5px solid var(--primary);background:var(--primary-soft)"><div class="stat-label" style="color:var(--primary)">Target GPA</div><div class="stat-val" style="background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="dash-target-gpa">—</div><div class="stat-sub" id="dash-target-class" style="color:var(--primary);opacity:.8">Set in Projection</div></div>
-          <div class="stat-card card"><div class="stat-label">Modules &amp; Semesters</div><div style="display:flex;align-items:baseline;gap:.4rem"><div class="stat-val" id="dash-mods">0</div><div style="font-size:.85rem;font-weight:600;color:var(--fg-muted);margin-bottom:.1rem">mods</div></div><div class="stat-sub"><span id="dash-sems">0</span> sem · <span id="dash-credits">0</span> credits</div></div>
+          <div class="stat-card card"><div class="stat-label">Semesters</div><div style="display:flex;align-items:baseline;gap:.4rem"><div class="stat-val" id="dash-sems">0</div><div style="font-size:.85rem;font-weight:600;color:var(--fg-muted);margin-bottom:.1rem">sem</div></div><div class="stat-sub"><span id="dash-mods">0</span> mod · <span id="dash-credits">0</span> credits</div></div>
           <div class="stat-card card"><div class="stat-label">Progress</div><div class="stat-val" id="dash-pct">0%</div><div class="stat-sub">of maximum GPA</div></div>
         </div>
-        <div class="grid-2" style="margin-bottom:1.25rem">
-          <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 300px;gap:1.25rem;margin-bottom:1.25rem;align-items:start">
+          <div class="card" style="min-width:0">
             <div class="font-semibold" style="margin-bottom:1.1rem;font-size:.9rem">GPA Trend</div>
             <canvas id="trend-chart" height="200"></canvas>
             <p class="text-muted" id="trend-empty" style="text-align:center;padding:2.5rem 0;display:none;font-size:.82rem">Add modules to see your GPA trend.</p>
           </div>
-          <div class="card">
+          <div class="card" style="min-width:0">
             <div class="font-semibold" style="margin-bottom:1.1rem;font-size:.9rem">Quick Actions</div>
             <div class="space-y">
               <button onclick="nav('calculator')" style="display:flex;align-items:center;gap:.9rem;padding:.85rem;border-radius:var(--radius-sm);width:100%;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;color:inherit;text-align:left;transition:all .17s;" onmouseenter="this.style.borderColor='var(--primary)';this.style.background='var(--primary-soft)'" onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
@@ -1677,12 +1682,12 @@ function renderDashboard() {
 function drawLineChart(canvas, data, maxVal) {
   const ctx = canvas.getContext('2d');
   const containerW = canvas.parentElement?.offsetWidth || 420;
-  const minStepW = 42; // px per data point minimum
+  const minStepW = 80; // px per data point minimum — wider spacing looks cleaner
   const naturalW = containerW;
-  const neededW = data.length > 1 ? Math.max(naturalW, (data.length - 1) * minStepW + 52) : naturalW;
+  const neededW = data.length > 1 ? Math.max(naturalW, (data.length - 1) * minStepW + 80) : naturalW;
   canvas.style.width = neededW + 'px';
   const W = neededW; const canvasH = parseInt(canvas.getAttribute('height')) || 100; canvas.width = W; canvas.height = canvasH;
-  const pad = {t:12,r:14,b:26,l:38};
+  const pad = {t:12,r:24,b:26,l:44};
   const w = W - pad.l - pad.r, h = canvasH - pad.t - pad.b;
   ctx.clearRect(0,0,W,canvasH+100);
   const isDark = document.documentElement.classList.contains('dark');
@@ -1694,12 +1699,14 @@ function drawLineChart(canvas, data, maxVal) {
     ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+w,y); ctx.stroke();
     ctx.fillStyle = textColor; ctx.font = '10px Plus Jakarta Sans,system-ui,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(((i/4)*maxVal).toFixed(1), pad.l-5, y+3.5);
+    ctx.fillText(((i/4)*maxVal).toFixed(1), pad.l-6, y+3.5);
   }
   if (!data.length) return;
   if (data.length === 1) {
-    const x = pad.l+w/2, y = pad.t+h-(data[0].gpa/maxVal)*h;
+    // Place single dot at 1/3 from left so it sits near the y-axis naturally
+    const x = pad.l + w * 0.18, y = pad.t+h-(data[0].gpa/maxVal)*h;
     ctx.fillStyle = lineColor; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=isDark?'#181720':'#fff'; ctx.beginPath(); ctx.arc(x,y,1.5,0,Math.PI*2); ctx.fill();
     ctx.fillStyle = textColor; ctx.textAlign = 'center'; ctx.fillText(data[0].name, x, pad.t+h+18); return;
   }
   const step = w/(data.length-1);
@@ -1842,7 +1849,7 @@ function calcComeback(preserveRows) {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">
         <div>
           <span class="text-muted" style="font-size:.75rem">Semester ${startSemNum+i} · ${thisSemCreds} credits</span>
-          ${isCustom ? '<span style="font-size:.62rem;font-weight:700;color:var(--primary);margin-left:.4rem;background:var(--primary-soft);padding:.05rem .3rem;border-radius:99px">custom</span>' : ''}
+          ${isCustom ? '<span style="font-size:.62rem;font-weight:700;color:var(--primary);margin-left:.4rem;background:var(--primary-soft);padding:.05rem .3rem;border-radius:99px">Custom</span>' : ''}
         </div>
         <span class="font-semibold" style="font-size:.87rem;color:${barColor}">${semGPA !== null ? semGPA.toFixed(2) : 'N/A'}</span>
       </div>
@@ -1864,7 +1871,6 @@ function calcComeback(preserveRows) {
     if (!preserveRows || existing.length !== remSems) {
       rowsContainer.innerHTML = Array.from({length: remSems}, (_, i) => {
         const semNum = startSemNum + i;
-        const modCount = window.cbSemModules ? (window.cbSemModules[i] || 5) : 5;
         const semTarget = window.cbSemTargets ? (window.cbSemTargets[i] ?? null) : null;
         const displayTarget = semTarget !== null ? semTarget : (possible ? Math.min(required, internalMax).toFixed(2) : '');
         return `<div class="cb-sem-row" style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .75rem;border-radius:var(--radius-sm);background:var(--bg-surface);gap:.75rem;flex-wrap:wrap">
@@ -1876,14 +1882,9 @@ function calcComeback(preserveRows) {
               <span style="font-size:.75rem;color:var(--fg-muted)">credits</span>
             </div>
             <div style="display:flex;align-items:center;gap:.4rem">
-              <input type="number" value="${modCount}" min="1" max="20" style="width:46px;padding:.22rem .38rem;font-size:.78rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:inherit;font-family:inherit;text-align:center"
-                oninput="if(!window.cbSemModules)window.cbSemModules=[];window.cbSemModules[${i}]=Math.max(1,parseInt(this.value)||1)">
-              <span style="font-size:.75rem;color:var(--fg-muted)">modules</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:.4rem">
               <span style="font-size:.75rem;color:var(--fg-muted)">Target:</span>
               <input type="number" value="${displayTarget}" min="0" max="${internalMax}" step="0.1" placeholder="auto"
-                style="width:68px;padding:.22rem .38rem;font-size:.78rem;border-radius:var(--radius-sm);border:1px solid var(--primary);background:var(--primary-soft);color:var(--primary);font-family:inherit;font-weight:700;text-align:center"
+                style="width:68px;padding:.22rem .38rem;font-size:.78rem;border-radius:var(--radius-sm);border:1px solid var(--border-mid);background:var(--bg-card);color:inherit;font-family:inherit;text-align:center"
                 oninput="if(!window.cbSemTargets)window.cbSemTargets=[];window.cbSemTargets[${i}]=this.value===''?null:Math.min(parseFloat(this.value)||0,${internalMax});calcComeback(true)"
                 onblur="if(this.value===''&&window.cbSemTargets){window.cbSemTargets[${i}]=null;calcComeback(true)}">
             </div>
@@ -2469,6 +2470,9 @@ function exportPDF() {
   doc.save(`Gradio-GPA-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
 }
 
+
+// ── Prevent scroll wheel from changing number inputs ──
+document.addEventListener('wheel', () => { if (document.activeElement?.type === 'number') document.activeElement.blur(); }, {passive:true});
 
 // ── Init ──
 loadState();

@@ -560,8 +560,8 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
                 <div><label class="field-label">Max GPA</label><input type="number" id="cs-max" value="4.0" step="0.1" min="1"></div>
               </div>
               <div style="margin-bottom:.75rem">
-                <label class="field-label">Grade Entries (one per line: Letter,Points — e.g. A,4.0)</label>
-                <textarea id="cs-grades" style="min-height:80px;font-size:.78rem;font-family:'Courier New',monospace" placeholder="A,4.0&#10;B+,3.5&#10;B,3.0&#10;C,2.0&#10;F,0.0"></textarea>
+                <label class="field-label">Grade Entries (one per line: Letter,Points — e.g. A+,4.0 or A,4.0)</label>
+                <textarea id="cs-grades" style="min-height:80px;font-size:.78rem;font-family:'Courier New',monospace" placeholder="A+,4.0&#10;A,4.0&#10;B+,3.5&#10;B,3.0&#10;C,2.0&#10;F,0.0"></textarea>
               </div>
               <button class="btn btn-primary" onclick="addCustomSchool()"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add School</button>
               <div id="cs-message" style="font-size:.77rem;margin-top:.5rem;display:none"></div>
@@ -1163,8 +1163,13 @@ function renderCalculator() {
 }
 function changeInstitution() {
   const val = document.getElementById('inst-select').value;
-  state.institution = val;
-  if (simState) simState.institution = val;
+  if (val !== state.institution) {
+    // Reset semesters to a single blank semester when switching schools
+    state.institution = val;
+    state.semesters = [{id:Date.now().toString(), name:'Semester 1', modules:[]}];
+    activeSemIdx = 0;
+    if (simState) { simState.institution = val; simState.semesters = JSON.parse(JSON.stringify(state.semesters)); }
+  }
   saveState(); renderCalculator();
 }
 function updateSemTabs() {
@@ -1355,9 +1360,12 @@ function addCustomSchool() {
   const grades = [];
   gradesRaw.split('\n').forEach(line => {
     const parts = line.split(',');
-    if (parts.length >= 2) { const g=parts[0].trim(), p=parseFloat(parts[1].trim()); if (g && !isNaN(p)) grades.push({g, p, l:`${g} (${p})`}); }
+    if (parts.length >= 2) { const g=parts[0].trim().toUpperCase(), p=parseFloat(parts[1].trim()); if (g && !isNaN(p)) grades.push({g, p, l:`${g} (${p})`}); }
   });
   if (!grades.length) { msg.textContent='Please add at least one grade entry.'; msg.style.color='var(--danger)'; msg.style.display='block'; return; }
+  // Mark the highest-point grade(s) as distinction (same colour as built-in schools)
+  const maxPts = Math.max(...grades.map(g=>g.p));
+  grades.forEach(g => { if (g.p === maxPts) g.isDistinction = true; });
   const key = 'CUSTOM_'+name.replace(/\s+/g,'_').toUpperCase().slice(0,10)+'_'+Date.now();
   INSTITUTIONS[key] = {name, maxGPA, displayCap:maxGPA, grades};
   const existing = JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}');
@@ -2337,7 +2345,10 @@ function exportPDF() {
   doc.setTextColor(22,21,26);
   doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.text(inst.name,ML,y); y+=8;
   doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(90,90,110);
-  doc.text(`GPA Scale: ${inst.displayCap||inst.maxGPA} max (A+ = ${inst.grades.find(g=>g.g==='A+')?.p||inst.maxGPA} internal points)`,ML,y); y+=10;
+  const topGrade = inst.grades.reduce((best,g) => g.p > (best?.p||0) ? g : best, null);
+  const topGradeLabel = topGrade ? topGrade.g : 'A+';
+  const topGradePoints = topGrade ? topGrade.p : inst.maxGPA;
+  doc.text(`GPA Scale: ${inst.displayCap||inst.maxGPA} max (${topGradeLabel} = ${topGradePoints} internal points)`,ML,y); y+=10;
   // Stat boxes
   const boxes=[
     {label:'CUMULATIVE GPA',val:gpa.toFixed(2),color:[47,82,224]},

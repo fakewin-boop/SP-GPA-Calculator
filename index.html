@@ -676,7 +676,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
             <div style="flex-shrink:0;margin-top:1rem">
               <div class="section-hdr">Recovery Settings</div>
               <div class="space-y">
-                <div><label class="field-label">Target GPA</label><input type="number" id="cb-target" value="3.5" step="0.1" min="0" oninput="calcComeback()"></div>
+                <div><label class="field-label">Target GPA</label><input type="number" id="cb-target" value="3.5" step="0.1" min="0.1" oninput="calcComeback()"></div>
                 <div><label class="field-label">Remaining Semesters</label><input type="number" id="cb-sems" value="2" min="1" max="20" oninput="calcComeback()"></div>
               </div>
             </div>
@@ -1612,7 +1612,12 @@ function handleScreenshotDrop(e) {
 function handleScreenshotSelect(e) {
   Array.from(e.target.files).forEach(processScreenshot);
 }
+const MAX_SCREENSHOT_BYTES = 10 * 1024 * 1024; // 10 MB
 function processScreenshot(file) {
+  if (file.size > MAX_SCREENSHOT_BYTES) {
+    alert(`"${file.name}" is too large (${(file.size/1024/1024).toFixed(1)} MB). Please attach screenshots under 10 MB.`);
+    return;
+  }
   const r = new FileReader();
   r.onload = ev => {
     attachedScreenshots.push({name:file.name, data:ev.target.result});
@@ -1779,7 +1784,7 @@ function calcComeback(preserveRows) {
   const max = inst.displayCap||inst.maxGPA;
   const rawGPA = calcGPARaw(allMods, state.institution);
   const completedCreds = allMods.reduce((s,m)=>s+(m.credits||0),0);
-  const target = parseFloat(document.getElementById('cb-target').value)||0;
+  const target = Math.max(parseFloat(document.getElementById('cb-target').value)||0, 0.01);
   const remSems = parseInt(document.getElementById('cb-sems').value)||1;
   const internalMax = inst.internalMax || max;
   const startSemNum = state.semesters.length + 1;
@@ -1904,115 +1909,9 @@ function calcComeback(preserveRows) {
 // ── Planner (stubbed — workload section removed) ──
 function renderPlanner() {
   // Planner/workload UI removed; function kept to avoid errors from old references
-  const grid = document.getElementById('planner-grid');
-  if (!grid) return; // DOM elements removed, bail out safely
-  grid.innerHTML = plannerSems.map((sem,si) => {
-    const stress = calcStress(sem);
-    const tc = sem.modules.reduce((s,m)=>s+(m.credits||0),0);
-    return `<div class="card planner-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem">
-        <input type="text" value="${sem.name}" style="font-size:.92rem;font-weight:700;background:transparent;border:none;outline:none;color:inherit;flex:1;font-family:inherit" oninput="plannerSems[${si}].name=this.value;savePlanner()">
-        <div style="display:flex;align-items:center;gap:.15rem">
-          <button class="icon-btn" title="Move left" ${si===0?'style="opacity:.25;pointer-events:none"':''} onclick="plannerSwapSem(${si},${si-1})"><svg class="icon-sm" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-          <button class="icon-btn" title="Move right" ${si===plannerSems.length-1?'style="opacity:.25;pointer-events:none"':''} onclick="plannerSwapSem(${si},${si+1})"><svg class="icon-sm" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-          <button class="icon-btn danger" onclick="plannerDelSem(${si})"><svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
-        </div>
-      </div>
-      <div style="margin-bottom:.9rem">
-        <div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.3rem">
-          <span class="text-muted">Stress Level</span>
-          <span style="font-weight:700;color:${stressColor(stress)}">${Math.round(stress*100)}%</span>
-        </div>
-        <div class="prog-track"><div class="prog-fill" style="width:${Math.round(stress*100)}%;background:${stressColor(stress)}"></div></div>
-        <div style="font-size:.68rem;margin-top:.3rem;color:${stressColor(stress)}">${stressLabel(stress)}</div>
-      </div>
-      <div class="space-y-sm" style="flex:1">
-        ${sem.modules.map((m,mi)=>`
-          <div style="padding:.55rem .7rem;border-radius:var(--radius-sm);background:var(--bg-surface)">
-            <div style="display:flex;align-items:center;gap:.45rem;margin-bottom:.35rem">
-              <input type="text" value="${m.name||''}" placeholder="Module name" style="flex:1;background:transparent;border:none;outline:none;font-size:.83rem;color:inherit;font-family:inherit" oninput="plannerSems[${si}].modules[${mi}].name=this.value;savePlanner()">
-              <button class="icon-btn danger" onclick="plannerDelMod(${si},${mi})"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.35rem">
-              <div><div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-subtle);margin-bottom:.15rem">Credits</div>
-                <input type="number" value="${m.credits||3}" min="1" style="width:100%;padding:.22rem .38rem;font-size:.75rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:inherit;font-family:inherit" oninput="plannerSems[${si}].modules[${mi}].credits=+this.value;savePlanner();renderPlanner()"></div>
-              <div><div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-subtle);margin-bottom:.15rem">Difficulty</div>
-                <select style="width:100%;padding:.22rem .38rem;font-size:.75rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:inherit;font-family:inherit" onchange="plannerSems[${si}].modules[${mi}].difficulty=this.value;savePlanner();renderPlanner()">
-                  <option ${m.difficulty==='easy'?'selected':''} value="easy">Easy</option>
-                  <option ${!m.difficulty||m.difficulty==='medium'?'selected':''} value="medium">Medium</option>
-                  <option ${m.difficulty==='hard'?'selected':''} value="hard">Hard</option>
-                </select></div>
-              <div><div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-subtle);margin-bottom:.15rem">Type</div>
-                <select style="width:100%;padding:.22rem .38rem;font-size:.75rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:inherit;font-family:inherit" onchange="plannerSems[${si}].modules[${mi}].type=this.value;savePlanner()">
-                  <option ${!m.type||m.type==='theory'?'selected':''} value="theory">Theory</option>
-                  <option ${m.type==='project'?'selected':''} value="project">Project</option>
-                  <option ${m.type==='lab'?'selected':''} value="lab">Lab</option>
-                </select></div>
-            </div>
-          </div>`).join('')}
-      </div>
-      <div style="border-top:1px solid var(--border);padding-top:.65rem;margin-top:.65rem">
-        <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.45rem;color:var(--fg-muted)"><span>Total credits</span><span class="font-semibold" style="color:var(--fg)">${tc}</span></div>
-        <div style="display:flex;gap:.5rem">
-          <button class="dashed-btn" style="flex:1" onclick="plannerAddMod(${si})"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Module</button>
-          <button class="dashed-btn" style="flex:1" onclick="plannerAddSem()"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Semester</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-  const plOverview = document.getElementById('planner-overview');
-  if (!plOverview) return;
-  const empty = !plannerSems.length;
-  if (!empty) {
-    const allPMods = plannerSems.flatMap(s=>s.modules);
-    const avgStress = plannerSems.reduce((s,sem)=>s+calcStress(sem),0)/plannerSems.length;
-    document.getElementById('pl-sems').textContent = plannerSems.length;
-    document.getElementById('pl-mods').textContent = allPMods.length;
-    document.getElementById('pl-creds').textContent = allPMods.reduce((s,m)=>s+(m.credits||0),0);
-    document.getElementById('pl-stress').textContent = Math.round(avgStress*100)+'%';
-    plOverview.style.display = 'block';
-  } else plOverview.style.display='none';
 }
 
-// Recalibrated stress: 20 credits + 3 hard modules → ~65–75%
-function calcStress(sem) {
-  const tc = sem.modules.reduce((s,m)=>s+(m.credits||0),0);
-  if (!tc && !sem.modules.length) return 0;
-  const hard = sem.modules.filter(m=>m.difficulty==='hard').length;
-  const med  = sem.modules.filter(m=>m.difficulty==='medium').length;
-  const proj = sem.modules.filter(m=>m.type==='project').length;
-  const total = sem.modules.length || 1;
-  const diffScore = (hard*3 + med*1.5) / (total*3);
-  const creditFactor = Math.min(tc/30, 1);
-  const projFactor = Math.min(proj * 0.06, 0.18);
-  const raw = diffScore * 0.55 + creditFactor * 0.35 + projFactor;
-  return Math.min(Math.max(raw, 0), 1);
-}
-function stressColor(l) { return l<0.35?'var(--success)':l<0.6?'var(--warning)':'var(--danger)'; }
-function stressLabel(l) { return l<0.35?'Balanced workload':l<0.6?'Moderate — manageable':l<0.8?'Intense — plan carefully':'Very heavy — consider redistributing'; }
 
-function renamePlannerSems() {
-  plannerSems.forEach((s,i) => { s.name = `Semester ${i+1}`; });
-}
-function plannerAddSem() {
-  plannerSems.push({id:Date.now().toString(), name:`Semester ${plannerSems.length+1}`, modules:[]});
-  savePlanner(); renderPlanner();
-}
-function plannerDelSem(i) { plannerSems.splice(i,1); renamePlannerSems(); savePlanner(); renderPlanner(); }
-function plannerAddMod(si) {
-  plannerSems[si].modules.push({id:Date.now().toString(),name:'',credits:3,difficulty:'medium',type:'theory'});
-  savePlanner(); renderPlanner();
-}
-function plannerDelMod(si, mi) {
-  plannerSems[si].modules.splice(mi, 1);
-  savePlanner(); renderPlanner();
-}
-function plannerSwapSem(a, b) {
-  if (b < 0 || b >= plannerSems.length) return;
-  [plannerSems[a], plannerSems[b]] = [plannerSems[b], plannerSems[a]];
-  renamePlannerSems(); savePlanner(); renderPlanner();
-}
-function savePlanner() { localStorage.setItem('gradio-planner', JSON.stringify(plannerSems)); }
 
 // ── Export Projection ──
 function exportProjectionJSON() {
@@ -2022,7 +1921,6 @@ function exportProjectionJSON() {
     institution: state.institution,
     currentGPA: gpa,
     classification: getClassification(gpa, state.institution),
-    planner: plannerSems,
     exportedAt: new Date().toISOString()
   };
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
@@ -2363,13 +2261,6 @@ function exportCalcJSON() {
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download=`gradio-calculator-${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-}
-function exportJSON() {
-  const data = {calculator:state, planner:plannerSems, customSchools:JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}'), exportedAt:new Date().toISOString()};
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=`gradio-backup-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 function clearData() {

@@ -827,7 +827,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
                 <div style="font-size:.72rem;color:var(--fg-subtle)">PNG, JPG, JPEG, HEIC accepted</div>
               </div>
               <div class="attachment-preview" id="attachment-preview"></div>
-              <div class="privacy-notice"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Images are stored locally — never uploaded to any server</div>
+              <div class="privacy-notice"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Screenshots are uploaded to Cloudinary only to attach them to your feedback message</div>
             </div>
             <button class="btn btn-primary btn-full" onclick="submitFeedback()" style="padding:.72rem">
               <svg class="icon-sm" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -887,14 +887,14 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
           <h3>Export & import system</h3>
           <p>When you export a PDF or JSON backup, that file is generated entirely in your browser and downloaded directly to your device. No data passes through any server during this process. JSON backups can be re-imported to restore your data across devices — this transfer happens directly between your devices with no intermediary.</p>
           <h3>Transcript parsing</h3>
-          <p>Any transcript or file you import into Gradio is parsed fully in-browser using JavaScript. The file is never uploaded to or processed by an external server. Images attached to feedback are also stored locally.</p>
+          <p>Any transcript or file you import into Gradio is parsed fully in-browser using JavaScript. The file is never uploaded to or processed by an external server.</p>
           <h3>Feedback form</h3>
-          <p>The in-app feedback form stores your message temporarily in your browser. Screenshots you attach are stored locally and never transmitted. If you choose to contact us directly via email, that communication is governed by your email provider's privacy policy.</p>
+          <p>The in-app feedback form sends your message via Web3Forms directly to us. If you attach screenshots, they are uploaded to Cloudinary — a third-party image host — solely to include them in the feedback email; they are not used for any other purpose. If you choose to contact us directly via email, that communication is governed by your email provider's privacy policy.</p>
           <h3>Data deletion</h3>
           <p>You can delete all your data at any time from the Export & Backup page using the "Clear All Data" option. This permanently removes everything from your browser's local storage.</p>
           <h3>Summary</h3>
           <ul>
-            <li>No personal data is collected or stored externally</li>
+            <li>Academic data is never collected or stored externally — only feedback messages (and optional screenshots) are transmitted when you choose to send them</li>
             <li>No cookies or tracking scripts</li>
             <li>No account or login required</li>
             <li>All processing happens in your browser</li>
@@ -905,8 +905,8 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
           <div class="section-hdr">Key principles</div>
           <div class="space-y-sm">
             <div style="padding:.8rem;border-radius:var(--radius-sm);background:var(--bg-surface)">
-              <div class="font-semibold" style="font-size:.83rem;margin-bottom:.2rem">Zero data collection</div>
-              <div class="text-muted" style="font-size:.75rem">Nothing you enter is ever sent anywhere.</div>
+              <div class="font-semibold" style="font-size:.83rem;margin-bottom:.2rem">Your academic data stays local</div>
+              <div class="text-muted" style="font-size:.75rem">Grades and modules never leave your device. Only feedback you choose to send is transmitted.</div>
             </div>
             <div style="padding:.8rem;border-radius:var(--radius-sm);background:var(--bg-surface)">
               <div class="font-semibold" style="font-size:.83rem;margin-bottom:.2rem">Local storage only</div>
@@ -1238,7 +1238,7 @@ function addModule() {
   const sem = target.semesters[activeSemIdx];
   if (!sem) return;
   sem.modules.push({id:Date.now().toString(), name:'', credits:3, grade:''});
-  saveState(); updateModulesPanel(); updateGPACircle();
+  if (!simMode) saveState(); updateModulesPanel(); updateGPACircle();
 }
 function updateMod(mi, field, val) {
   const target = simMode ? simState : state;
@@ -1962,6 +1962,7 @@ function renderPlanner() {
   }).join('');
   const plOverview = document.getElementById('planner-overview');
   if (!plOverview) return;
+  const empty = !plannerSems.length;
   if (!empty) {
     const allPMods = plannerSems.flatMap(s=>s.modules);
     const avgStress = plannerSems.reduce((s,sem)=>s+calcStress(sem),0)/plannerSems.length;
@@ -2000,6 +2001,10 @@ function plannerAddSem() {
 function plannerDelSem(i) { plannerSems.splice(i,1); renamePlannerSems(); savePlanner(); renderPlanner(); }
 function plannerAddMod(si) {
   plannerSems[si].modules.push({id:Date.now().toString(),name:'',credits:3,difficulty:'medium',type:'theory'});
+  savePlanner(); renderPlanner();
+}
+function plannerDelMod(si, mi) {
+  plannerSems[si].modules.splice(mi, 1);
   savePlanner(); renderPlanner();
 }
 function plannerSwapSem(a, b) {

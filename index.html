@@ -1136,6 +1136,12 @@ function renderCalculator() {
 function changeInstitution() {
   const val = document.getElementById('inst-select').value;
   if (val !== state.institution) {
+    const hasData = state.semesters.some(s => s.modules.length > 0);
+    if (hasData && !confirm('Changing institution will clear all your current modules and semesters. This cannot be undone.\n\nContinue?')) {
+      // Revert the select back to current institution
+      document.getElementById('inst-select').value = state.institution;
+      return;
+    }
     // Exit sim mode cleanly before changing institution
     if (simMode) {
       simMode = false; simState = null;
@@ -2185,6 +2191,7 @@ async function submitFeedback() {
   const subjectLine = `${catLabels[feedbackCategory] || 'Feedback'} — GradLens`;
 
   const btn = document.querySelector('#feedback-form-view .btn-primary');
+  if (!btn) return;
   btn.disabled = true;
 
   try {

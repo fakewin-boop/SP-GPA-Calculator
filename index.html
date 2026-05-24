@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gradio – Singapore GPA Calculator</title>
+<title>GradLens – Singapore GPA Calculator</title>
 <meta name="description" content="Free, privacy-first GPA calculator for Singapore students. Supports SP, NP, TP, NYP, RP, NUS, NTU, SMU, SUTD, SIT, SUSS, ITE.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -350,9 +350,9 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <div class="logo-mark" style="background:transparent;box-shadow:none;">
-      <img src="GradioLogo.png" alt="Gradio" style="width:1.6rem;height:1.6rem;object-fit:contain;display:block;">
+      <img src="GradLensLogo.png" alt="GradLens" style="width:1.6rem;height:1.6rem;object-fit:contain;display:block;">
     </div>
-    <span class="logo-name">Gradio</span>
+    <span class="logo-name">GradLens</span>
     <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">
       <svg id="mobile-theme-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
@@ -363,9 +363,9 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
     <div class="sidebar-top">
       <div class="sidebar-logo">
         <div class="logo-mark" style="width:1.8rem;height:1.8rem;border-radius:8px;flex-shrink:0;background:transparent;box-shadow:none;">
-          <img src="GradioLogo.png" alt="Gradio" style="width:1.8rem;height:1.8rem;object-fit:contain;display:block;">
+          <img src="GradLensLogo.png" alt="GradLens" style="width:1.8rem;height:1.8rem;object-fit:contain;display:block;">
         </div>
-        <span class="sidebar-logo-text">Gradio</span>
+        <span class="sidebar-logo-text">GradLens</span>
       </div>
       <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -400,7 +400,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
       </button>
       <button class="sidebar-link" data-page="about" onclick="nav('about')">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span class="sidebar-link-text">About Gradio</span>
+        <span class="sidebar-link-text">About GradLens</span>
       </button>
     </nav>
     <div class="sidebar-bottom">
@@ -420,7 +420,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
       </div>
       <div id="dash-empty" class="empty-state card">
         <div class="empty-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg></div>
-        <h2>Welcome to Gradio</h2>
+        <h2>Welcome to GradLens</h2>
         <p class="text-muted" style="font-size:.83rem;margin-bottom:1.4rem;max-width:30ch;margin-left:auto;margin-right:auto">Head to the Calculator to add your modules and start tracking your GPA.</p>
         <button class="btn btn-primary" onclick="nav('calculator')">Go to Calculator</button>
       </div>
@@ -788,7 +788,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
 
     <!-- ═══ FEEDBACK ═══ -->
     <div class="app-page" id="feedback-page">
-      <div class="page-header"><h1 class="page-title">Contact & Feedback</h1><p class="page-sub">Help us make Gradio better for every student</p></div>
+      <div class="page-header"><h1 class="page-title">Contact & Feedback</h1><p class="page-sub">Help us make GradLens better for every student</p></div>
       <div class="grid-2" style="align-items:start">
         <div class="card">
           <div id="feedback-form-view">
@@ -841,7 +841,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
             </div>
             <div class="fade-slide" style="animation-delay:.15s">
               <div class="font-semibold" style="font-size:1.15rem;margin-bottom:.4rem">Message received!</div>
-              <p class="text-muted" style="font-size:.85rem;line-height:1.7;max-width:28ch;margin:0 auto .9rem">Thanks for helping make Gradio better. We genuinely read every message.</p>
+              <p class="text-muted" style="font-size:.85rem;line-height:1.7;max-width:28ch;margin:0 auto .9rem">Thanks for helping make GradLens better. We genuinely read every message.</p>
               <button class="btn btn-ghost" onclick="resetFeedback()">Send another</button>
             </div>
           </div>
@@ -877,17 +877,17 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
 
     <!-- ═══ PRIVACY ═══ -->
     <div class="app-page" id="privacy-page">
-      <div class="page-header"><h1 class="page-title">Privacy Policy</h1><p class="page-sub">How Gradio handles your academic data</p></div>
+      <div class="page-header"><h1 class="page-title">Privacy Policy</h1><p class="page-sub">How GradLens handles your academic data</p></div>
       <div class="content-page-wrap">
         <div class="card prose">
           <h3>Your data stays on your device</h3>
-          <p>Gradio is a fully client-side application. There is no backend server, no database, and no external API that receives your academic data. Everything you enter — module names, grades, credits, and semester plans — is stored exclusively in your browser's <code>localStorage</code>.</p>
+          <p>GradLens is a fully client-side application. There is no backend server, no database, and no external API that receives your academic data. Everything you enter — module names, grades, credits, and semester plans — is stored exclusively in your browser's <code>localStorage</code>.</p>
           <h3>No account, no tracking</h3>
-          <p>Gradio does not require an account or login of any kind. We do not set cookies, run analytics scripts, or track usage in any form. Your browsing behaviour within Gradio is entirely private.</p>
+          <p>GradLens does not require an account or login of any kind. We do not set cookies, run analytics scripts, or track usage in any form. Your browsing behaviour within GradLens is entirely private.</p>
           <h3>Export & import system</h3>
           <p>When you export a PDF or JSON backup, that file is generated entirely in your browser and downloaded directly to your device. No data passes through any server during this process. JSON backups can be re-imported to restore your data across devices — this transfer happens directly between your devices with no intermediary.</p>
           <h3>Transcript parsing</h3>
-          <p>Any transcript or file you import into Gradio is parsed fully in-browser using JavaScript. The file is never uploaded to or processed by an external server.</p>
+          <p>Any transcript or file you import into GradLens is parsed fully in-browser using JavaScript. The file is never uploaded to or processed by an external server.</p>
           <h3>Feedback form</h3>
           <p>The in-app feedback form sends your message via Web3Forms directly to us. If you attach screenshots, they are uploaded to Cloudinary — a third-party image host — solely to include them in the feedback email; they are not used for any other purpose. If you choose to contact us directly via email, that communication is governed by your email provider's privacy policy.</p>
           <h3>Data deletion</h3>
@@ -927,14 +927,14 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
 
     <!-- ═══ ABOUT ═══ -->
     <div class="app-page" id="about-page">
-      <div class="page-header"><h1 class="page-title">About Gradio</h1><p class="page-sub">Why we built it and what we're working toward</p></div>
+      <div class="page-header"><h1 class="page-title">About GradLens</h1><p class="page-sub">Why we built it and what we're working toward</p></div>
       <div class="content-page-wrap">
         <div class="card prose">
           <h3>The problem we saw</h3>
           <p>Most Singapore students manage their GPA through a frustrating combination of mental math, scattered spreadsheets, and digging through old semester emails. Existing GPA calculators either feel outdated, overly simplistic, or disconnected from how students actually think about their academic journey.</p>
           <p>We found ourselves repeatedly asking the same questions: "What do I need next semester to hit a Merit?" or "Is it even realistic to recover from this semester?" There was no good tool to answer these clearly.</p>
-          <h3>What Gradio is</h3>
-          <p>Gradio is a modern, privacy-first GPA tracker and academic planner built specifically for Singapore students. It supports all major polytechnics, universities, and ITE — with accurate grading scales for each. You can also add your own custom school if yours isn't listed.</p>
+          <h3>What GradLens is</h3>
+          <p>GradLens is a modern, privacy-first GPA tracker and academic planner built specifically for Singapore students. It supports all major polytechnics, universities, and ITE — with accurate grading scales for each. You can also add your own custom school if yours isn't listed.</p>
           <p>The goal is simple: give every student a single place to understand their standing, project their future, and plan smarter — without needing to create an account or trust a third party with their data.</p>
           <h3>Our core values</h3>
           <ul>
@@ -945,9 +945,9 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
             <li><strong>Educationally transparent</strong> — we explain how calculations work</li>
           </ul>
           <h3>Who made this</h3>
-          <p>Gradio was built by <a href="https://www.linkedin.com/in/zeth-leong/" target="_blank">Zeth Leong</a> as a passion project for Singapore students. If you have ideas, spotted a bug, or just want to share feedback, the Contact & Feedback page is the best way to reach out.</p>
+          <p>GradLens was built by <a href="https://www.linkedin.com/in/zeth-leong/" target="_blank">Zeth Leong</a> as a passion project for Singapore students. If you have ideas, spotted a bug, or just want to share feedback, the Contact & Feedback page is the best way to reach out.</p>
           <h3>What's next</h3>
-          <p>Gradio is actively evolving. Planned improvements include richer export formats, PDF transcript import with auto-parsing, and smarter projection models. Feature requests from students directly shape what gets built next — so please do reach out.</p>
+          <p>GradLens is actively evolving. Planned improvements include richer export formats, PDF transcript import with auto-parsing, and smarter projection models. Feature requests from students directly shape what gets built next — so please do reach out.</p>
         </div>
         <div class="card">
           <div class="section-hdr">Built for these institutions</div>
@@ -992,10 +992,10 @@ let attachedScreenshots = [];
 
 function loadState() {
   try {
-    const s = localStorage.getItem('gradio-data'); if (s) state = JSON.parse(s);
-    const p = localStorage.getItem('gradio-planner'); if (p) plannerSems = JSON.parse(p);
-    const c = localStorage.getItem('gradio-custom-schools'); if (c) { const cs = JSON.parse(c); Object.assign(INSTITUTIONS, cs); }
-    const proj = localStorage.getItem('gradio-projection');
+    const s = localStorage.getItem('gradlens-data'); if (s) state = JSON.parse(s);
+    const p = localStorage.getItem('gradlens-planner'); if (p) plannerSems = JSON.parse(p);
+    const c = localStorage.getItem('gradlens-custom-schools'); if (c) { const cs = JSON.parse(c); Object.assign(INSTITUTIONS, cs); }
+    const proj = localStorage.getItem('gradlens-projection');
     if (proj) {
       const projData = JSON.parse(proj);
       if (projData.semCredits && Array.isArray(projData.semCredits)) window.cbSemCredits = projData.semCredits.slice();
@@ -1017,8 +1017,8 @@ function applyPendingProjection() {
   window._pendingProjection = null;
 }
 function saveState() {
-  localStorage.setItem('gradio-data', JSON.stringify(state));
-  localStorage.setItem('gradio-planner', JSON.stringify(plannerSems));
+  localStorage.setItem('gradlens-data', JSON.stringify(state));
+  localStorage.setItem('gradlens-planner', JSON.stringify(plannerSems));
 }
 function currentData() { return simMode ? simState : state; }
 
@@ -1108,12 +1108,12 @@ function closeMobileSidebar() {
 
 // ── Theme ──
 function initTheme() {
-  const t = localStorage.getItem('gradio-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+  const t = localStorage.getItem('gradlens-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
   applyTheme(t);
 }
 function applyTheme(t) {
   document.documentElement.classList.toggle('dark', t === 'dark');
-  localStorage.setItem('gradio-theme', t);
+  localStorage.setItem('gradlens-theme', t);
   const sunPath = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
   const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
   const html = t === 'dark' ? sunPath : moonPath;
@@ -1345,9 +1345,9 @@ function addCustomSchool() {
   grades.forEach(g => { if (g.p === maxPts) g.isDistinction = true; });
   const key = 'CUSTOM_'+name.replace(/\s+/g,'_').toUpperCase().slice(0,10)+'_'+Date.now();
   INSTITUTIONS[key] = {name, maxGPA, displayCap:maxGPA, grades};
-  const existing = JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}');
+  const existing = JSON.parse(localStorage.getItem('gradlens-custom-schools')||'{}');
   existing[key] = INSTITUTIONS[key];
-  localStorage.setItem('gradio-custom-schools', JSON.stringify(existing));
+  localStorage.setItem('gradlens-custom-schools', JSON.stringify(existing));
   msg.textContent = `"${name}" added!`; msg.style.color='var(--success)'; msg.style.display='block';
   document.getElementById('cs-name').value=''; document.getElementById('cs-grades').value='';
   document.getElementById('inst-select').innerHTML = Object.entries(INSTITUTIONS).map(([k,v])=>`<option value="${k}" ${k===state.institution?'selected':''}>${v.name}</option>`).join('');
@@ -1406,19 +1406,19 @@ function importJSONFile(file) {
   r.onload = ev => {
     try {
       const d = JSON.parse(ev.target.result);
-      if (d.calculator) localStorage.setItem('gradio-data', JSON.stringify(d.calculator));
-      else localStorage.setItem('gradio-data', JSON.stringify(d));
-      if (d.planner) localStorage.setItem('gradio-planner', JSON.stringify(d.planner));
-      if (d.customSchools) localStorage.setItem('gradio-custom-schools', JSON.stringify(d.customSchools));
-      if (d.projection) localStorage.setItem('gradio-projection', JSON.stringify(d.projection));
+      if (d.calculator) localStorage.setItem('gradlens-data', JSON.stringify(d.calculator));
+      else localStorage.setItem('gradlens-data', JSON.stringify(d));
+      if (d.planner) localStorage.setItem('gradlens-planner', JSON.stringify(d.planner));
+      if (d.customSchools) localStorage.setItem('gradlens-custom-schools', JSON.stringify(d.customSchools));
+      if (d.projection) localStorage.setItem('gradlens-projection', JSON.stringify(d.projection));
       showImportMsg('Data imported successfully! Reloading...', true);
       setTimeout(() => location.reload(), 1200);
-    } catch { showImportMsg('Invalid file format. Please use a Gradio JSON backup.', false); }
+    } catch { showImportMsg('Invalid file format. Please use a GradLens JSON backup.', false); }
   };
   r.readAsText(file);
 }
 
-// ── Import PDF (Gradio-exported PDFs) ──
+// ── Import PDF (GradLens-exported PDFs) ──
 function importPDF(e) { const f=e.target.files?.[0]; if(f) importPDFFile(f); }
 function importPDFFile(file) {
   animateProgress('pdf-progress-bar', 1200);
@@ -1448,7 +1448,7 @@ function importPDFFile(file) {
       const isGPA = fullText.includes('Singapore GPA Report') || fullText.includes('GPA Calculator');
       const isProjection = fullText.includes('Academic Projection');
       if (!isGPA && !isProjection) {
-        showImportMsg('This does not look like a Gradio-exported PDF. Please use a Gradio GPA or Projection PDF.', false);
+        showImportMsg('This does not look like a GradLens-exported PDF. Please use a GradLens GPA or Projection PDF.', false);
         return;
       }
       if (isGPA) {
@@ -1458,7 +1458,7 @@ function importPDFFile(file) {
       }
     } catch(err) {
       console.error('PDF parse error:', err);
-      showImportMsg('Could not read PDF. Make sure it is a Gradio-exported PDF.', false);
+      showImportMsg('Could not read PDF. Make sure it is a GradLens-exported PDF.', false);
     }
   });
 }
@@ -1475,7 +1475,7 @@ function importGPAFromPDFText(text) {
     const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
     const semesters = [];
     let curSem = null;
-    const SKIP = /^(Semester GPA|Final Cumulative|Gradio|Generated|Page \d|GPA Scale|CUMULATIVE|CLASSIFICATION|TOTAL CREDITS|SEMESTERS|MODULE|CREDITS|GRADE POINTS|Distinction|Merit|Pass|Fail|\d+\.\d+\s*(\/|\·)|Singapore |Academic)/i;
+    const SKIP = /^(Semester GPA|Final Cumulative|GradLens|Generated|Page \d|GPA Scale|CUMULATIVE|CLASSIFICATION|TOTAL CREDITS|SEMESTERS|MODULE|CREDITS|GRADE POINTS|Distinction|Merit|Pass|Fail|\d+\.\d+\s*(\/|\·)|Singapore |Academic)/i;
 
     let semCounter = 0;
     for (const l of lines) {
@@ -1527,7 +1527,7 @@ function importGPAFromPDFText(text) {
       return;
     }
     const newState = Object.assign({}, state, { institution: detectedInst, semesters: validSems });
-    localStorage.setItem('gradio-data', JSON.stringify(newState));
+    localStorage.setItem('gradlens-data', JSON.stringify(newState));
     showImportMsg(`GPA data imported! Found ${validSems.length} semester(s) with ${validSems.reduce((s,sem)=>s+sem.modules.length,0)} module(s). Reloading...`, true);
     setTimeout(() => location.reload(), 1400);
   } catch(e) {
@@ -1541,7 +1541,7 @@ function importProjectionFromPDFText(text) {
     const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
     const semesters = [];
     let curSem = null;
-    const SKIP = /^(MODULE|CREDITS|DIFFICULTY|TYPE|Planned Semesters|Academic Projection|Gradio|Generated|Page \d|Current CGPA|Singapore )/i;
+    const SKIP = /^(MODULE|CREDITS|DIFFICULTY|TYPE|Planned Semesters|Academic Projection|GradLens|Generated|Page \d|Current CGPA|Singapore )/i;
     const DIFFICULTIES = ['easy', 'medium', 'hard'];
     const TYPES = ['theory', 'practical', 'lab', 'project', 'mixed'];
 
@@ -1593,7 +1593,7 @@ function importProjectionFromPDFText(text) {
       showImportMsg('Could not extract planner data from this Projection PDF. Try importing a JSON backup instead.', false);
       return;
     }
-    localStorage.setItem('gradio-planner', JSON.stringify(validSems));
+    localStorage.setItem('gradlens-planner', JSON.stringify(validSems));
     showImportMsg(`Projection data imported! Found ${validSems.length} planned semester(s). Reloading...`, true);
     setTimeout(() => location.reload(), 1400);
   } catch(e) {
@@ -1925,7 +1925,7 @@ function exportProjectionJSON() {
   };
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=`Gradio-Projection-${new Date().toISOString().split('T')[0]}.json`;
+  const a = document.createElement('a'); a.href=url; a.download=`GradLens-Projection-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 function exportProjectionPDF() {
@@ -1953,7 +1953,7 @@ function exportProjectionPDF() {
   // Header
   doc.setFillColor(47,82,224); doc.rect(0,0,PW,36,'F');
   doc.setTextColor(255,255,255);
-  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.text('Gradio',ML,16);
+  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.text('GradLens',ML,16);
   doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.text('Academic Projection Report',ML,25);
   doc.setFontSize(9); doc.text(`Generated: ${new Date().toLocaleDateString('en-SG',{year:'numeric',month:'long',day:'numeric'})}`,PW-MR-3,25,{align:'right'});
   y=46;
@@ -2091,11 +2091,11 @@ function exportProjectionPDF() {
   for (let pg=1; pg<=pageCount; pg++) {
     doc.setPage(pg);
     doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(150,160,180);
-    doc.text('Gradio · Academic Projection',ML,PH-8);
+    doc.text('GradLens · Academic Projection',ML,PH-8);
     doc.text(`Page ${pg} of ${pageCount}`,PW-MR-3,PH-8,{align:'right'});
     doc.setDrawColor(210,215,235); doc.setLineWidth(0.3); doc.line(ML,PH-12,PW-MR-3,PH-12);
   }
-  doc.save(`Gradio-Projection-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`GradLens-Projection-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
 }
 
 // ── Export ──
@@ -2160,7 +2160,7 @@ function selectFeedbackCat(el, cat) {
 async function uploadToCloudinary(base64DataUrl) {
   const formData = new FormData();
   formData.append('file', base64DataUrl);
-  formData.append('upload_preset', 'gradio_feedback');
+  formData.append('upload_preset', 'gradlens_feedback');
   const res = await fetch('https://api.cloudinary.com/v1_1/dl3wsdv8c/image/upload', {
     method: 'POST',
     body: formData
@@ -2178,7 +2178,7 @@ async function submitFeedback() {
   const now = new Date();
   const timeStr = now.toLocaleString('en-SG', {dateStyle:'medium', timeStyle:'short'});
   const catLabels = {feature:'Feature Request', bug:'Bug Report', general:'General Feedback', other:'Other'};
-  const subjectLine = `${catLabels[feedbackCategory] || 'Feedback'} — Gradio`;
+  const subjectLine = `${catLabels[feedbackCategory] || 'Feedback'} — GradLens`;
 
   const btn = document.querySelector('#feedback-form-view .btn-primary');
   btn.disabled = true;
@@ -2209,7 +2209,7 @@ async function submitFeedback() {
         name: name || 'Anonymous',
         email: email || '',
         message: `Category: ${catLabels[feedbackCategory] || 'General'}\nTime: ${timeStr}\nFrom: ${name || 'Anonymous'}${email ? ' <' + email + '>' : ''}\n\n${msg}${screenshotNote}`,
-        from_name: 'Gradio Feedback',
+        from_name: 'GradLens Feedback',
         botcheck: '',
       })
     });
@@ -2217,8 +2217,8 @@ async function submitFeedback() {
     if (!data.success) throw new Error(data.message || 'Submission failed');
 
     const fb = {category:feedbackCategory, name, email, message:msg, attachments:attachedScreenshots.length, date:now.toISOString()};
-    const all = JSON.parse(localStorage.getItem('gradio-feedback')||'[]');
-    all.push(fb); localStorage.setItem('gradio-feedback', JSON.stringify(all));
+    const all = JSON.parse(localStorage.getItem('gradlens-feedback')||'[]');
+    all.push(fb); localStorage.setItem('gradlens-feedback', JSON.stringify(all));
     document.getElementById('feedback-form-view').style.display = 'none';
     document.getElementById('feedback-success-view').style.display = 'block';
 
@@ -2257,14 +2257,14 @@ function exportCalcJSON() {
     semCredits: window.cbSemCredits ? window.cbSemCredits.slice() : [],
     semTargets: window.cbSemTargets ? window.cbSemTargets.slice() : []
   };
-  const data = {calculator:state, projection, customSchools:JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}'), exportedAt:new Date().toISOString()};
+  const data = {calculator:state, projection, customSchools:JSON.parse(localStorage.getItem('gradlens-custom-schools')||'{}'), exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=`gradio-calculator-${new Date().toISOString().split('T')[0]}.json`;
+  const a = document.createElement('a'); a.href=url; a.download=`gradlens-calculator-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 function clearData() {
-  ['gradio-data','gradio-planner','gradio-custom-schools','gradio-feedback','gradio-projection'].forEach(k=>localStorage.removeItem(k));
+  ['gradlens-data','gradlens-planner','gradlens-custom-schools','gradlens-feedback','gradlens-projection'].forEach(k=>localStorage.removeItem(k));
   location.reload();
 }
 
@@ -2285,7 +2285,7 @@ function exportPDF() {
   // Header
   doc.setFillColor(47,82,224); doc.rect(0,0,PW,36,'F');
   doc.setTextColor(255,255,255);
-  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.text('Gradio',ML,16);
+  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.text('GradLens',ML,16);
   doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.text('Singapore GPA Report',ML,25);
   doc.setFontSize(9); doc.text(`Generated: ${date}`,PW-MR-3,25,{align:'right'});
   y = 46;
@@ -2374,11 +2374,11 @@ function exportPDF() {
   for (let pg=1; pg<=pageCount; pg++) {
     doc.setPage(pg);
     doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(150,160,180);
-    doc.text('Gradio · Singapore GPA Calculator',ML,PH-8);
+    doc.text('GradLens · Singapore GPA Calculator',ML,PH-8);
     doc.text(`Page ${pg} of ${pageCount}`,PW-MR-3,PH-8,{align:'right'});
     doc.setDrawColor(210,215,235); doc.setLineWidth(0.3); doc.line(ML,PH-12,PW-MR-3,PH-12);
   }
-  doc.save(`Gradio-GPA-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`GradLens-GPA-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
 }
 
 

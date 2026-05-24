@@ -853,7 +853,7 @@ html.dark .mobile-topbar{background:var(--bg-surface);}
             <div class="section-hdr">Get in touch directly</div>
             <p class="text-muted" style="font-size:.83rem;line-height:1.7;margin-bottom:1.1rem">Have any suggestions? Fill out the form or reach out through one of our channels! We'd appreciate your feedback! </p>
             <div style="display:flex;flex-direction:column;gap:.6rem">
-            <a class="btn btn-ghost btn-full" href="https://mail.google.com/mail/?view=cm&to=fakewin12345@gmail.com" target="_blank" rel="noopener" style="justify-content:flex-start;gap:.75rem">
+            <a class="btn btn-ghost btn-full" href="mailto:fakewin12345@gmail.com" target="_blank" rel="noopener" style="justify-content:flex-start;gap:.75rem">
               <svg class="icon-sm" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               fakewin12345@gmail.com
             </a>
@@ -1216,21 +1216,24 @@ function updateModulesPanel() {
   document.getElementById('sem-gpa-label').textContent = sem.modules.length ? `GPA: ${semGPA.toFixed(2)}` : '';
   delBtn.style.display = d.semesters.length > 1 ? 'inline-flex' : 'none';
   const inst = INSTITUTIONS[d.institution];
-  document.getElementById('modules-list').innerHTML = sem.modules.map((m,mi) => `
+  document.getElementById('modules-list').innerHTML = sem.modules.map((m,mi) => {
+    const safeName = (m.name||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `
     <div class="module-row" id="mod-${mi}">
-      <input class="mod-name" type="text" value="${m.name||''}" placeholder="Module name"
+      <input class="mod-name" type="text" value="${safeName}" placeholder="Module name"
         style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.33rem .55rem;font-size:.83rem;color:var(--fg)"
         oninput="updateMod(${mi},'name',this.value)">
       <input type="number" value="${m.credits||3}" min="1" max="12"
         style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.33rem .55rem;font-size:.83rem;color:var(--fg);text-align:center"
-        oninput="updateMod(${mi},'credits',+this.value)">
+        oninput="updateMod(${mi},'credits',Math.max(1,+this.value||1))">
       <select style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.33rem .55rem;font-size:.83rem;color:var(--fg)"
         onchange="updateMod(${mi},'grade',this.value)">
         <option value="">—</option>
         ${inst.grades.map(g=>`<option value="${g.g}" ${m.grade===g.g?'selected':''}>${g.isDistinction ? '✦ ' : ''}${g.g}</option>`).join('')}
       </select>
       <button class="icon-btn danger" onclick="deleteMod(${mi})"><svg class="icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function addModule() {
@@ -1926,7 +1929,7 @@ function exportProjectionJSON() {
   };
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=`Gradio-Projection-${new Date().toISOString().split('T')[0]}.json`;
+  const a = document.createElement('a'); a.href=url; a.download=`GradLens-Projection-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 function exportProjectionPDF() {
@@ -2096,7 +2099,7 @@ function exportProjectionPDF() {
     doc.text(`Page ${pg} of ${pageCount}`,PW-MR-3,PH-8,{align:'right'});
     doc.setDrawColor(210,215,235); doc.setLineWidth(0.3); doc.line(ML,PH-12,PW-MR-3,PH-12);
   }
-  doc.save(`Gradio-Projection-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`GradLens-Projection-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
 }
 
 // ── Export ──
@@ -2261,7 +2264,7 @@ function exportCalcJSON() {
   const data = {calculator:state, projection, customSchools:JSON.parse(localStorage.getItem('gradio-custom-schools')||'{}'), exportedAt:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=`gradio-calculator-${new Date().toISOString().split('T')[0]}.json`;
+  const a = document.createElement('a'); a.href=url; a.download=`gradlens-calculator-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 function clearData() {
@@ -2379,7 +2382,7 @@ function exportPDF() {
     doc.text(`Page ${pg} of ${pageCount}`,PW-MR-3,PH-8,{align:'right'});
     doc.setDrawColor(210,215,235); doc.setLineWidth(0.3); doc.line(ML,PH-12,PW-MR-3,PH-12);
   }
-  doc.save(`Gradio-GPA-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
+  doc.save(`GradLens-GPA-${state.institution}-${new Date().toISOString().split('T')[0]}.pdf`);
 }
 
 
